@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北极星管理平台 - 专家纪要库</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .filter-btn.active { background: white; color: #1f2937; font-weight: 500; }
+        .modal-backdrop { background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(2px); }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div id="app"></div>
+
+    <!-- 新增/编辑纪要弹窗 -->
+    <div id="minuteModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between p-5 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900" id="minuteModalTitle">新增纪要</h3>
+                <button onclick="closeModal('minuteModal')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"><i class="ri-close-line text-xl"></i></button>
+            </div>
+            <div id="minuteModalBody" class="p-5"></div>
+        </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4">
+            <div class="p-5 text-center">
+                <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3"><i class="ri-delete-bin-line text-xl text-red-500"></i></div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">删除确认</h3>
+                <p class="text-gray-500 text-sm">确定要删除该纪要吗？此操作不可恢复。</p>
+            </div>
+            <div class="flex gap-3 p-5 pt-0">
+                <button onclick="closeModal('deleteModal')" class="flex-1 h-10 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm cursor-pointer">取消</button>
+                <button onclick="confirmDelete()" class="flex-1 h-10 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors text-sm cursor-pointer">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ============ 数据 ============
+let minutes = [
+    { id: 'm1', title: '债券市场利率走势分析与配置策略 - 会议纪要', expert: '王雅婷', inst: '固金证券', type: '深度专访', tags: ['金融','A股','固收'], views: 1256, time: '2026-03-29', status: '已发布', hasAI: true, hasOrig: true },
+    { id: 'm2', title: '港股科技板块：估值修复与催化剂分析 - 会议纪要', expert: '陈志远', inst: '东吴证券', type: '独家会议', tags: ['科技','港股'], views: 987, time: '2026-03-21', status: '已发布', hasAI: true, hasOrig: true },
+    { id: 'm3', title: '新能源汽车产业链：竞争格局重塑与投资机会 - 纪要', expert: '刘思远', inst: '浦发银行投研部', type: '实地调研', tags: ['新能源','汽车','产业链'], views: 2103, time: '2026-03-15', status: '已发布', hasAI: true, hasOrig: false },
+    { id: 'm4', title: '人工智能赋能金融：大模型在投研领域的实践探索 - 纪要', expert: '李晓峰', inst: '华锐技术', type: '专家', tags: ['人工智能','大模型','投研'], views: 1567, time: '2026-03-10', status: '已发布', hasAI: false, hasOrig: true },
+    { id: 'm5', title: '宏观经济政策解读：财政发力与货币配合 - 纪要', expert: '赵文博', inst: '中信建投', type: '独家会议', tags: ['宏观','财政','货币'], views: 834, time: '2026-03-05', status: '已发布', hasAI: true, hasOrig: true },
+    { id: 'm6', title: '量化投资策略：多因子模型的构建与优化 - 纪要', expert: '周建国', inst: '申万宏源', type: '行业调查', tags: ['量化','因子','程序化'], views: 256, time: '2026-02-28', status: '草稿', hasAI: false, hasOrig: true },
+    { id: 'm7', title: '医药行业投资机会：创新药与医疗器械的双轮驱动 - 纪要', expert: '赵文博', inst: '中信建投', type: '深度专访', tags: ['医药','生物','创新药'], views: 0, time: '', status: '草稿', hasAI: false, hasOrig: false },
+    { id: 'm8', title: '2026年A股市场展望：结构性机会与风险防范 - 纪要', expert: '张明远', inst: '国泰海通证券', type: '独家会议', tags: ['A股','策略','宏观'], views: 0, time: '', status: '草稿', hasAI: false, hasOrig: false },
+];
+
+let searchQuery = '';
+let activeFilter = '全部';
+let editingId = null;
+let deletingId = null;
+
+const navLinkMap = {
+    '/experts': 'experts-clone.html', '/conferences': 'conferences.html', '/attendees': 'attendees.html',
+    '/minutes': 'minutes.html', '/collections': 'collections.html', '/topics': 'topics.html', '/stocks': 'stocks.html',
+    '/research': 'research.html', '/users': 'user-management.html', '/source-monitor': 'source-monitor.html', '/user-profile': 'user-profile.html'
+};
+
+function renderNavItem(path, icon, label, isSub, isActive) {
+    const href = navLinkMap[path] || path.replace('/', '') + '.html';
+    if (isSub) {
+        return `<a class="flex items-center h-10 mx-2 mb-0.5 rounded-lg text-sm transition-colors cursor-pointer whitespace-nowrap pl-8 pr-4 ${isActive ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}" href="${href}"><div class="w-3 h-3 flex items-center justify-center mr-1 flex-shrink-0"><i class="ri-corner-down-right-line text-xs text-gray-300"></i></div><div class="w-5 h-5 flex items-center justify-center flex-shrink-0"><i class="${icon} text-base"></i></div><span class="ml-2">${label}</span></a>`;
+    }
+    return `<a class="flex items-center h-10 mx-2 mb-0.5 rounded-lg text-sm transition-colors cursor-pointer whitespace-nowrap px-4 ${isActive ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}" href="${href}"><div class="w-5 h-5 flex items-center justify-center flex-shrink-0"><i class="${icon} text-base"></i></div><span class="ml-2">${label}</span></a>`;
+}
+
+function renderNav() {
+    return `<aside class="flex flex-col bg-white border-r border-gray-100 transition-all duration-300 w-56">
+        <div class="flex items-center h-16 px-4 border-b border-gray-100 cursor-pointer select-none"><img alt="财跃星辰" class="w-8 h-8 object-contain flex-shrink-0" src="https://static.readdy.ai/image/3dd3b08e3f41e718a9a692da40c4373e/36a1cddcc28d86e13fb969a9b2232329.png"><span class="ml-2 text-sm font-semibold text-gray-800 whitespace-nowrap">财跃星辰管理平台</span></div>
+        <nav class="flex-1 py-4 overflow-y-auto">
+            ${renderNavItem('/experts','ri-user-star-line','专家管理',false,false)}
+            ${renderNavItem('/conferences','ri-video-chat-line','专家会议管理',false,false)}
+            ${renderNavItem('/attendees','ri-team-line','会议人员管理',true,false)}
+            ${renderNavItem('/minutes','ri-file-text-line','专家纪要库',false,true)}
+            ${renderNavItem('/collections','ri-bookmark-3-line','精选纪要集',true,false)}
+            ${renderNavItem('/topics','ri-pie-chart-line','话题与板块&产业链',true,false)}
+            ${renderNavItem('/stocks','ri-stock-line','话题与股票清单',true,false)}
+            ${renderNavItem('/research','ri-survey-line','调研活动管理',false,false)}
+            ${renderNavItem('/users','ri-group-line','用户管理',false,false)}
+            ${renderNavItem('/user-profile','ri-user-heart-line','用户画像管理',false,false)}
+            ${renderNavItem('/source-monitor','ri-radar-line','信源监控需求管理',false,false)}
+        </nav>
+        <div class="border-t border-gray-100 p-3"><button class="w-full flex items-center justify-center h-9 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors cursor-pointer"><div class="w-5 h-5 flex items-center justify-center"><i class="ri-arrow-left-s-line text-lg"></i></div></button></div>
+    </aside>`;
+}
+
+function getStats() {
+    return { total: minutes.length, published: minutes.filter(m => m.status === '已发布').length, views: minutes.reduce((s,m) => s + m.views, 0) };
+}
+
+function getFiltered() {
+    return minutes.filter(m => {
+        const matchSearch = !searchQuery || m.title.includes(searchQuery) || m.expert.includes(searchQuery) || m.tags.some(t => t.includes(searchQuery));
+        const matchFilter = activeFilter === '全部' || m.status === activeFilter;
+        return matchSearch && matchFilter;
+    });
+}
+
+function getStatusBadge(s) {
+    return s === '已发布' ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-600">已发布</span>' : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-500">草稿</span>';
+}
+
+function render() {
+    const stats = getStats();
+    const filtered = getFiltered();
+    const filters = ['全部','已发布','草稿'];
+
+    document.getElementById('app').innerHTML = `
+    <div class="flex h-screen bg-gray-50 font-sans overflow-hidden">
+        ${renderNav()}
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 flex-shrink-0">
+                <h1 class="text-base font-semibold text-gray-800">专家纪要库</h1>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 flex items-center justify-center"><i class="ri-notification-3-line text-gray-400 text-lg"></i></div>
+                    <div class="flex items-center gap-2 cursor-pointer"><div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center"><span class="text-xs font-medium text-red-600">管</span></div><span class="text-sm text-gray-600">管理员</span><div class="w-4 h-4 flex items-center justify-center"><i class="ri-arrow-down-s-line text-gray-400"></i></div></div>
+                </div>
+            </header>
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- 看板 -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-red-500 bg-red-50"><i class="ri-file-text-line text-xl"></i></div>
+                        <div><div class="text-2xl font-semibold text-gray-800">${stats.total}</div><div class="text-xs text-gray-400 mt-0.5">纪要总数</div></div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-green-500 bg-green-50"><i class="ri-checkbox-circle-line text-xl"></i></div>
+                        <div><div class="text-2xl font-semibold text-gray-800">${stats.published}</div><div class="text-xs text-gray-400 mt-0.5">已发布</div></div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-orange-500 bg-orange-50"><i class="ri-eye-line text-xl"></i></div>
+                        <div><div class="text-2xl font-semibold text-gray-800">${stats.views.toLocaleString()}</div><div class="text-xs text-gray-400 mt-0.5">累计阅读</div></div>
+                    </div>
+                </div>
+
+                <!-- 筛选 & 操作 -->
+                <div class="bg-white rounded-xl">
+                    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <div class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-gray-400"><i class="ri-search-line text-sm"></i></div>
+                                <input placeholder="搜索纪要标题、专家..." class="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg w-60 focus:outline-none focus:border-red-400" value="${searchQuery}" oninput="searchQuery=this.value;render()">
+                            </div>
+                            <div class="flex items-center gap-1 bg-gray-50 rounded-lg p-1">
+                                ${filters.map(f => `<button class="filter-btn px-3 py-1 rounded-md text-sm transition-colors cursor-pointer whitespace-nowrap ${activeFilter===f?'active bg-white text-gray-800 font-medium':'text-gray-500 hover:text-gray-700'}" onclick="activeFilter='${f}';render()">${f}</button>`).join('')}
+                            </div>
+                        </div>
+                        <button onclick="openMinuteModal()" class="px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 cursor-pointer"><i class="ri-add-line"></i>新增纪要</button>
+                    </div>
+
+                    <!-- 表格 -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="text-left text-gray-400 border-b border-gray-50">
+                                    <th class="px-5 py-3 font-medium">纪要标题</th>
+                                    <th class="px-5 py-3 font-medium">关联专家</th>
+                                    <th class="px-5 py-3 font-medium">话题标签</th>
+                                    <th class="px-5 py-3 font-medium">阅读量</th>
+                                    <th class="px-5 py-3 font-medium">发布时间</th>
+                                    <th class="px-5 py-3 font-medium">状态</th>
+                                    <th class="px-5 py-3 font-medium">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${filtered.map(m => `
+                                <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                    <td class="px-5 py-4">
+                                        <div class="flex items-center gap-2">
+                                            ${m.hasAI ? '<span class="px-1.5 py-0.5 rounded bg-blue-50 text-blue-500 text-xs">AI摘要</span>' : ''}
+                                            ${m.hasOrig ? '<span class="px-1.5 py-0.5 rounded bg-gray-50 text-gray-400 text-xs">含原文</span>' : ''}
+                                            <span class="text-gray-800 font-medium max-w-[260px] truncate">${m.title}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-4">
+                                        <div class="text-gray-600">${m.expert}</div>
+                                        <div class="text-gray-400 text-xs">${m.inst}</div>
+                                    </td>
+                                    <td class="px-5 py-4">
+                                        <div class="flex flex-wrap gap-1">
+                                            ${m.tags.map(t => `<span class="px-2 py-0.5 rounded-md bg-gray-50 text-gray-500 text-xs">${t}</span>`).join('')}
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-4 text-gray-600">${m.views > 0 ? m.views.toLocaleString() : '-'}</td>
+                                    <td class="px-5 py-4 text-gray-600">${m.time || '-'}</td>
+                                    <td class="px-5 py-4">${getStatusBadge(m.status)}</td>
+                                    <td class="px-5 py-4">
+                                        <div class="flex items-center gap-2">
+                                            <button onclick="openMinuteModal('${m.id}')" class="px-2.5 py-1 rounded-md bg-gray-50 text-gray-600 text-xs hover:bg-gray-100 transition-colors cursor-pointer">编辑</button>
+                                            ${m.status === '已发布' ?
+                                                `<button onclick="toggleStatus('${m.id}')" class="px-2.5 py-1 rounded-md bg-gray-50 text-gray-600 text-xs hover:bg-orange-50 hover:text-orange-500 transition-colors cursor-pointer">下线</button>` :
+                                                `<button onclick="toggleStatus('${m.id}')" class="px-2.5 py-1 rounded-md bg-gray-50 text-gray-600 text-xs hover:bg-green-50 hover:text-green-600 transition-colors cursor-pointer">发布</button>`
+                                            }
+                                            <button onclick="openDeleteModal('${m.id}')" class="px-2.5 py-1 rounded-md bg-gray-50 text-gray-600 text-xs hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>`).join('')}
+                            </tbody>
+                        </table>
+                        ${filtered.length === 0 ? '<div class="py-16 text-center text-gray-400"><i class="ri-inbox-line text-4xl mb-2 block"></i>暂无数据</div>' : ''}
+                    </div>
+                    <div class="px-5 py-3 border-t border-gray-50 text-sm text-gray-400">共 ${filtered.length} 条记录</div>
+                </div>
+            </main>
+        </div>
+    </div>`;
+}
+
+function toggleStatus(id) {
+    const m = minutes.find(x => x.id === id);
+    if (!m) return;
+    if (m.status === '已发布') {
+        m.status = '草稿';
+    } else {
+        m.status = '已发布';
+        m.time = new Date().toISOString().split('T')[0];
+    }
+    render();
+}
+
+function openMinuteModal(id) {
+    editingId = id || null;
+    const m = id ? minutes.find(x => x.id === id) : null;
+    document.getElementById('minuteModalTitle').textContent = m ? '编辑纪要' : '新增纪要';
+    document.getElementById('minuteModalBody').innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">纪要标题</label>
+                <input id="mTitle" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400" value="${m?m.title:''}" placeholder="输入纪要标题">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">关联专家</label>
+                    <input id="mExpert" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400" value="${m?m.expert:''}" placeholder="专家姓名">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">所属机构</label>
+                    <input id="mInst" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400" value="${m?m.inst:''}" placeholder="机构名称">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">话题标签</label>
+                <input id="mTags" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400" value="${m?m.tags.join('、'):''}" placeholder="输入标签，多个用顿号分隔">
+            </div>
+            <div class="flex items-center gap-6">
+                <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                    <input type="checkbox" id="mAI" ${m&&m.hasAI?'checked':''} class="rounded"> AI摘要
+                </label>
+                <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                    <input type="checkbox" id="mOrig" ${m&&m.hasOrig?'checked':''} class="rounded"> 含原文
+                </label>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">初始状态</label>
+                <select id="mStatus" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400">
+                    <option value="草稿" ${!m||m.status==='草稿'?'selected':''}>草稿</option>
+                    <option value="已发布" ${m&&m.status==='已发布'?'selected':''}>发布</option>
+                </select>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeModal('minuteModal')" class="flex-1 h-10 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm cursor-pointer">取消</button>
+                <button onclick="saveMinute()" class="flex-1 h-10 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors text-sm cursor-pointer">保存</button>
+            </div>
+        </div>`;
+    showModal('minuteModal');
+}
+
+function saveMinute() {
+    const title = document.getElementById('mTitle').value.trim();
+    if (!title) { alert('请输入纪要标题'); return; }
+    const data = {
+        title,
+        expert: document.getElementById('mExpert').value.trim(),
+        inst: document.getElementById('mInst').value.trim(),
+        tags: document.getElementById('mTags').value.trim().split('、').filter(Boolean),
+        hasAI: document.getElementById('mAI').checked,
+        hasOrig: document.getElementById('mOrig').checked,
+        status: document.getElementById('mStatus').value,
+    };
+    if (editingId) {
+        const m = minutes.find(x => x.id === editingId);
+        if (m) Object.assign(m, data);
+        if (data.status === '已发布' && !m.time) m.time = new Date().toISOString().split('T')[0];
+    } else {
+        minutes.unshift({ id: 'm'+Date.now(), ...data, views: 0, time: data.status === '已发布' ? new Date().toISOString().split('T')[0] : '', type: '深度专访' });
+    }
+    closeModal('minuteModal');
+    editingId = null;
+    render();
+}
+
+function openDeleteModal(id) { deletingId = id; showModal('deleteModal'); }
+function confirmDelete() { minutes = minutes.filter(m => m.id !== deletingId); closeModal('deleteModal'); deletingId = null; render(); }
+
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+function showModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+
+render();
+</script>
+</body>
+</html>

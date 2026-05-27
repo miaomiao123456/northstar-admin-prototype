@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北极星管理平台 - 精选纪要集</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .filter-btn.active { background: white; color: #1f2937; font-weight: 500; }
+        .modal-backdrop { background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(2px); }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div id="app"></div>
+
+    <!-- 新建/编辑精选集弹窗 -->
+    <div id="collectionModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between p-5 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900" id="collectionModalTitle">新建精选集</h3>
+                <button onclick="closeModal('collectionModal')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"><i class="ri-close-line text-xl"></i></button>
+            </div>
+            <div id="collectionModalBody" class="p-5"></div>
+        </div>
+    </div>
+
+    <!-- 查看详情弹窗 -->
+    <div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between p-5 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">精选集详情</h3>
+                <button onclick="closeModal('detailModal')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"><i class="ri-close-line text-xl"></i></button>
+            </div>
+            <div id="detailModalBody" class="p-5"></div>
+        </div>
+    </div>
+
+<script>
+let collections = [
+    { id: 'col1', title: '2026年宏观策略精选', desc: '精选2026年度最具价值的宏观经济与市场策略研究纪要，涵盖财政政策、货币政策、大类资产配置等核心议题，助力投资者把握全年市场主线。', type: '后台创建', status: '已发布', minutes: 3, creator: '管理员', tags: ['宏观','策略','年度精选'], views: 4821, likes: 312, time: '2026-03-25' },
+    { id: 'col2', title: '科技赛道深度研究合集', desc: '汇聚人工智能、半导体、新能源等科技赛道核心纪要，从技术突破到商业化落地全面覆盖。', type: '后台创建', status: '已发布', minutes: 5, creator: '管理员', tags: ['科技','AI','半导体','新能源'], views: 3567, likes: 245, time: '2026-03-20' },
+    { id: 'col3', title: '固收专题：利率债与信用债配置', desc: '系统性整理固收领域深度纪要，涵盖利率走势预判、信用风险评估、久期策略等专业内容。', type: '后台创建', status: '已发布', minutes: 2, creator: '管理员', tags: ['固收','债券','利率'], views: 1234, likes: 98, time: '2026-03-15' },
+    { id: 'col4', title: '新能源产业链全景图谱', desc: '从上游材料到下游应用，全面梳理新能源汽车、光伏、储能等新能源产业链的投资机会与风险点。', type: '后台创建', status: '已发布', minutes: 4, creator: '管理员', tags: ['新能源','产业链','汽车','光伏'], views: 2890, likes: 198, time: '2026-03-10' },
+    { id: 'col5', title: '港股优质标的精选', desc: '精选港股市场中具备核心竞争力的优质公司纪要，覆盖互联网、消费、医药等核心板块。', type: '用户自建', status: '已发布', minutes: 6, creator: '李晓峰', tags: ['港股','互联网','消费'], views: 1890, likes: 156, time: '2026-03-08' },
+    { id: 'col6', title: '量化策略实战手册', desc: '收录多因子选股、CTA策略、高频交易等量化领域的实战纪要与策略回测分析。', type: '用户自建', status: '草稿', minutes: 2, creator: '周建国', tags: ['量化','因子','CTA'], views: 0, likes: 0, time: '' },
+    { id: 'col7', title: '医药行业创新前沿', desc: '聚焦创新药研发、医疗器械突破、CXO产业链等医药行业最前沿的投资研究纪要。', type: '用户自建', status: '草稿', minutes: 1, creator: '赵文博', tags: ['医药','创新药','医疗器械'], views: 0, likes: 0, time: '' },
+];
+
+let searchQuery = '';
+let activeTypeFilter = '全部类型';
+let activeStatusFilter = '全部状态';
+let editingId = null;
+
+const navLinkMap = {
+    '/experts': 'experts-clone.html', '/conferences': 'conferences.html', '/attendees': 'attendees.html',
+    '/minutes': 'minutes.html', '/collections': 'collections.html', '/topics': 'topics.html', '/stocks': 'stocks.html',
+    '/research': 'research.html', '/users': 'user-management.html', '/source-monitor': 'source-monitor.html', '/user-profile': 'user-profile.html'
+};
+
+function renderNavItem(path, icon, label, isSub, isActive) {
+    const href = navLinkMap[path] || path.replace('/', '') + '.html';
+    if (isSub) {
+        return `<a class="flex items-center h-10 mx-2 mb-0.5 rounded-lg text-sm transition-colors cursor-pointer whitespace-nowrap pl-8 pr-4 ${isActive ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}" href="${href}"><div class="w-3 h-3 flex items-center justify-center mr-1 flex-shrink-0"><i class="ri-corner-down-right-line text-xs text-gray-300"></i></div><div class="w-5 h-5 flex items-center justify-center flex-shrink-0"><i class="${icon} text-base"></i></div><span class="ml-2">${label}</span></a>`;
+    }
+    return `<a class="flex items-center h-10 mx-2 mb-0.5 rounded-lg text-sm transition-colors cursor-pointer whitespace-nowrap px-4 ${isActive ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}" href="${href}"><div class="w-5 h-5 flex items-center justify-center flex-shrink-0"><i class="${icon} text-base"></i></div><span class="ml-2">${label}</span></a>`;
+}
+
+function renderNav() {
+    return `<aside class="flex flex-col bg-white border-r border-gray-100 transition-all duration-300 w-56">
+        <div class="flex items-center h-16 px-4 border-b border-gray-100 cursor-pointer select-none"><img alt="财跃星辰" class="w-8 h-8 object-contain flex-shrink-0" src="https://static.readdy.ai/image/3dd3b08e3f41e718a9a692da40c4373e/36a1cddcc28d86e13fb969a9b2232329.png"><span class="ml-2 text-sm font-semibold text-gray-800 whitespace-nowrap">财跃星辰管理平台</span></div>
+        <nav class="flex-1 py-4 overflow-y-auto">
+            ${renderNavItem('/experts','ri-user-star-line','专家管理',false,false)}
+            ${renderNavItem('/conferences','ri-video-chat-line','专家会议管理',false,false)}
+            ${renderNavItem('/attendees','ri-team-line','会议人员管理',true,false)}
+            ${renderNavItem('/minutes','ri-file-text-line','专家纪要库',false,false)}
+            ${renderNavItem('/collections','ri-bookmark-3-line','精选纪要集',true,true)}
+            ${renderNavItem('/topics','ri-pie-chart-line','话题与板块&产业链',true,false)}
+            ${renderNavItem('/stocks','ri-stock-line','话题与股票清单',true,false)}
+            ${renderNavItem('/research','ri-survey-line','调研活动管理',false,false)}
+            ${renderNavItem('/users','ri-group-line','用户管理',false,false)}
+            ${renderNavItem('/user-profile','ri-user-heart-line','用户画像管理',false,false)}
+            ${renderNavItem('/source-monitor','ri-radar-line','信源监控需求管理',false,false)}
+        </nav>
+        <div class="border-t border-gray-100 p-3"><button class="w-full flex items-center justify-center h-9 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors cursor-pointer"><div class="w-5 h-5 flex items-center justify-center"><i class="ri-arrow-left-s-line text-lg"></i></div></button></div>
+    </aside>`;
+}
+
+function getStats() {
+    return {
+        total: collections.length,
+        adminCreated: collections.filter(c => c.type === '后台创建').length,
+        userCreated: collections.filter(c => c.type === '用户自建').length,
+        published: collections.filter(c => c.status === '已发布').length,
+    };
+}
+
+function getFiltered() {
+    return collections.filter(c => {
+        const matchSearch = !searchQuery || c.title.includes(searchQuery) || c.creator.includes(searchQuery);
+        const matchType = activeTypeFilter === '全部类型' || c.type === activeTypeFilter;
+        const matchStatus = activeStatusFilter === '全部状态' || c.status === activeStatusFilter;
+        return matchSearch && matchType && matchStatus;
+    });
+}
+
+function getTypeBadge(t) {
+    return t === '后台创建' ? '<span class="px-2 py-0.5 rounded-md bg-red-50 text-red-500 text-xs font-medium">后台创建</span>' : '<span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-600 text-xs font-medium">用户自建</span>';
+}
+
+function getStatusBadge(s) {
+    return s === '已发布' ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-600">已发布</span>' : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-500">草稿</span>';
+}
+
+function render() {
+    const stats = getStats();
+    const filtered = getFiltered();
+    const typeFilters = ['全部类型','后台创建','用户自建'];
+    const statusFilters = ['全部状态','已发布','草稿'];
+
+    document.getElementById('app').innerHTML = `
+    <div class="flex h-screen bg-gray-50 font-sans overflow-hidden">
+        ${renderNav()}
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 flex-shrink-0">
+                <h1 class="text-base font-semibold text-gray-800">精选纪要集</h1>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 flex items-center justify-center"><i class="ri-notification-3-line text-gray-400 text-lg"></i></div>
+                    <div class="flex items-center gap-2 cursor-pointer"><div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center"><span class="text-xs font-medium text-red-600">管</span></div><span class="text-sm text-gray-600">管理员</span><div class="w-4 h-4 flex items-center justify-center"><i class="ri-arrow-down-s-line text-gray-400"></i></div></div>
+                </div>
+            </header>
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- 看板 -->
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-red-500 bg-red-50"><i class="ri-bookmark-3-line text-xl"></i></div>
+                        <div><div class="text-2xl font-semibold text-gray-800">${stats.total}</div><div class="text-xs text-gray-400 mt-0.5">精选集总数</div></div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-red-500 bg-red-50"><i class="ri-shield-star-line text-xl"></i></div>
+                        <div><div class="text-2xl font-semibold text-gray-800">${stats.adminCreated}</div><div class="text-xs text-gray-400 mt-0.5">后台创建</div></div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-amber-500 bg-amber-50"><i class="ri-user-heart-line text-xl"></i></div>
+                        <div><div class="text-2xl font-semibold text-gray-800">${stats.userCreated}</div><div class="text-xs text-gray-400 mt-0.5">用户自建</div></div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-green-500 bg-green-50"><i class="ri-checkbox-circle-line text-xl"></i></div>
+                        <div><div class="text-2xl font-semibold text-gray-800">${stats.published}</div><div class="text-xs text-gray-400 mt-0.5">已发布</div></div>
+                    </div>
+                </div>
+
+                <!-- 筛选 & 操作 -->
+                <div class="bg-white rounded-xl mb-4">
+                    <div class="flex items-center justify-between px-5 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <div class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-gray-400"><i class="ri-search-line text-sm"></i></div>
+                                <input placeholder="搜索集合标题、创建人..." class="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg w-56 focus:outline-none focus:border-red-400" value="${searchQuery}" oninput="searchQuery=this.value;render()">
+                            </div>
+                            <div class="flex items-center gap-1 bg-gray-50 rounded-lg p-1">
+                                ${typeFilters.map(f => `<button class="filter-btn px-3 py-1 rounded-md text-sm transition-colors cursor-pointer whitespace-nowrap ${activeTypeFilter===f?'active bg-white text-gray-800 font-medium':'text-gray-500 hover:text-gray-700'}" onclick="activeTypeFilter='${f}';render()">${f.replace('全部类型','全部类型')}</button>`).join('')}
+                            </div>
+                            <div class="flex items-center gap-1 bg-gray-50 rounded-lg p-1">
+                                ${statusFilters.map(f => `<button class="filter-btn px-3 py-1 rounded-md text-sm transition-colors cursor-pointer whitespace-nowrap ${activeStatusFilter===f?'active bg-white text-gray-800 font-medium':'text-gray-500 hover:text-gray-700'}" onclick="activeStatusFilter='${f}';render()">${f}</button>`).join('')}
+                            </div>
+                        </div>
+                        <button onclick="openCollectionModal()" class="px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 cursor-pointer"><i class="ri-add-line"></i>新建精选集</button>
+                    </div>
+                </div>
+
+                <!-- 卡片列表 -->
+                <div class="grid grid-cols-1 gap-4">
+                    ${filtered.map(c => `
+                    <div class="bg-white rounded-xl p-5 hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-2">
+                                    ${getTypeBadge(c.type)}
+                                    ${getStatusBadge(c.status)}
+                                </div>
+                                <h3 class="text-gray-800 font-semibold text-base mb-1 cursor-pointer hover:text-red-500" onclick="openDetailModal('${c.id}')">${c.title}</h3>
+                                <p class="text-gray-400 text-sm mb-3 line-clamp-2">${c.desc}</p>
+                                <div class="flex items-center gap-3 text-xs text-gray-400">
+                                    <span class="flex items-center gap-1"><i class="ri-file-text-line"></i>${c.minutes} 篇纪要</span>
+                                    <span class="flex items-center gap-1"><i class="ri-user-line"></i>${c.creator}</span>
+                                    <span class="flex items-center gap-1"><i class="ri-eye-line"></i>${c.views.toLocaleString()}</span>
+                                    <span class="flex items-center gap-1"><i class="ri-heart-line"></i>${c.likes}</span>
+                                </div>
+                                <div class="flex flex-wrap gap-1 mt-2">
+                                    ${c.tags.map(t => `<span class="px-2 py-0.5 rounded-md bg-gray-50 text-gray-500 text-xs">${t}</span>`).join('')}
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+                                <button onclick="openDetailModal('${c.id}')" class="px-3 py-1.5 rounded-lg bg-gray-50 text-gray-600 text-xs hover:bg-gray-100 transition-colors cursor-pointer">查看详情</button>
+                                <button onclick="openCollectionModal('${c.id}')" class="px-3 py-1.5 rounded-lg bg-gray-50 text-gray-600 text-xs hover:bg-gray-100 transition-colors cursor-pointer">编辑</button>
+                                ${c.status === '已发布' ?
+                                    `<button onclick="toggleStatus('${c.id}')" class="px-3 py-1.5 rounded-lg bg-gray-50 text-gray-600 text-xs hover:bg-orange-50 hover:text-orange-500 transition-colors cursor-pointer">下线</button>` :
+                                    `<button onclick="toggleStatus('${c.id}')" class="px-3 py-1.5 rounded-lg bg-gray-50 text-gray-600 text-xs hover:bg-green-50 hover:text-green-600 transition-colors cursor-pointer">发布</button>`
+                                }
+                            </div>
+                        </div>
+                    </div>`).join('')}
+                </div>
+                ${filtered.length === 0 ? '<div class="bg-white rounded-xl py-16 text-center text-gray-400"><i class="ri-inbox-line text-4xl mb-2 block"></i>暂无数据</div>' : ''}
+            </main>
+        </div>
+    </div>`;
+}
+
+function toggleStatus(id) {
+    const c = collections.find(x => x.id === id);
+    if (!c) return;
+    c.status = c.status === '已发布' ? '草稿' : '已发布';
+    if (c.status === '已发布') c.time = new Date().toISOString().split('T')[0];
+    render();
+}
+
+function openDetailModal(id) {
+    const c = collections.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('detailModalBody').innerHTML = `
+        <div class="space-y-4">
+            <div class="flex items-center gap-2">${getTypeBadge(c.type)} ${getStatusBadge(c.status)}</div>
+            <h3 class="text-lg font-semibold text-gray-900">${c.title}</h3>
+            <p class="text-gray-600 text-sm">${c.desc}</p>
+            <div class="grid grid-cols-2 gap-4">
+                <div><div class="text-xs text-gray-400 mb-1">创建人</div><div class="text-gray-700">${c.creator}</div></div>
+                <div><div class="text-xs text-gray-400 mb-1">创建时间</div><div class="text-gray-700">${c.time || '-'}</div></div>
+                <div><div class="text-xs text-gray-400 mb-1">阅读量</div><div class="text-gray-700">${c.views.toLocaleString()}</div></div>
+                <div><div class="text-xs text-gray-400 mb-1">点赞数</div><div class="text-gray-700">${c.likes}</div></div>
+            </div>
+            <div><div class="text-xs text-gray-400 mb-1">标签</div><div class="flex flex-wrap gap-1">${c.tags.map(t=>`<span class="px-2 py-0.5 rounded-md bg-gray-50 text-gray-500 text-xs">${t}</span>`).join('')}</div></div>
+        </div>`;
+    showModal('detailModal');
+}
+
+function openCollectionModal(id) {
+    editingId = id || null;
+    const c = id ? collections.find(x => x.id === id) : null;
+    document.getElementById('collectionModalTitle').textContent = c ? '编辑精选集' : '新建精选集';
+    document.getElementById('collectionModalBody').innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">精选集标题</label>
+                <input id="colTitle" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400" value="${c?c.title:''}" placeholder="输入精选集标题">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">简介</label>
+                <textarea id="colDesc" rows="3" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400 resize-none" placeholder="输入精选集简介">${c?c.desc:''}</textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">标签</label>
+                <input id="colTags" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400" value="${c?c.tags.join('、'):''}" placeholder="输入标签，多个用顿号分隔">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">类型</label>
+                    <select id="colType" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400">
+                        <option value="后台创建" ${!c||c.type==='后台创建'?'selected':''}>后台创建</option>
+                        <option value="用户自建" ${c&&c.type==='用户自建'?'selected':''}>用户自建</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">初始状态</label>
+                    <select id="colStatus" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400">
+                        <option value="草稿" ${!c||c.status==='草稿'?'selected':''}>草稿</option>
+                        <option value="已发布" ${c&&c.status==='已发布'?'selected':''}>发布</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeModal('collectionModal')" class="flex-1 h-10 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm cursor-pointer">取消</button>
+                <button onclick="saveCollection()" class="flex-1 h-10 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors text-sm cursor-pointer">保存</button>
+            </div>
+        </div>`;
+    showModal('collectionModal');
+}
+
+function saveCollection() {
+    const title = document.getElementById('colTitle').value.trim();
+    if (!title) { alert('请输入标题'); return; }
+    const data = {
+        title,
+        desc: document.getElementById('colDesc').value.trim(),
+        tags: document.getElementById('colTags').value.trim().split('、').filter(Boolean),
+        type: document.getElementById('colType').value,
+        status: document.getElementById('colStatus').value,
+    };
+    if (editingId) {
+        const c = collections.find(x => x.id === editingId);
+        if (c) Object.assign(c, data);
+    } else {
+        collections.unshift({ id: 'col'+Date.now(), ...data, minutes: 0, creator: '管理员', views: 0, likes: 0, time: data.status === '已发布' ? new Date().toISOString().split('T')[0] : '' });
+    }
+    closeModal('collectionModal');
+    editingId = null;
+    render();
+}
+
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+function showModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+
+render();
+</script>
+</body>
+</html>

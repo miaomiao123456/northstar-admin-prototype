@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北极星管理平台 - 专家会议管理</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .filter-btn.active { background: white; color: #1f2937; font-weight: 500; }
+        .modal-backdrop { background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(2px); }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div id="app"></div>
+
+    <!-- 新增/编辑会议弹窗 -->
+    <div id="conferenceModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between p-5 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900" id="conferenceModalTitle">新增会议</h3>
+                <button onclick="closeConferenceModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"><i class="ri-close-line text-xl"></i></button>
+            </div>
+            <div id="conferenceModalBody" class="p-5"></div>
+        </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4">
+            <div class="p-5 text-center">
+                <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3"><i class="ri-delete-bin-line text-xl text-red-500"></i></div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">删除确认</h3>
+                <p class="text-gray-500 text-sm">确定要删除该会议吗？此操作不可恢复。</p>
+            </div>
+            <div class="flex gap-3 p-5 pt-0">
+                <button onclick="closeDeleteModal()" class="flex-1 h-10 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm cursor-pointer">取消</button>
+                <button onclick="confirmDelete()" class="flex-1 h-10 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors text-sm cursor-pointer">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 会议详情弹窗 -->
+    <div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between p-5 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">会议详情</h3>
+                <button onclick="closeDetailModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"><i class="ri-close-line text-xl"></i></button>
+            </div>
+            <div id="detailModalBody" class="p-5"></div>
+        </div>
+    </div>
+
+<script>
+// ============ 数据 ============
+let conferences = [
+    { id: 'c1', title: '2026年A股市场展望：结构性机会与风险防范', experts: [{name:'张明远',inst:'国泰海通证券'}], tags: ['券商','行业分析','宏观解读','A股','策略'], time: '2026-04-10 14:00', registrations: 328, status: '即将开始', desc: '深度解读2026年A股市场的结构性机会，涵盖宏观政策、行业配置和个股策略。', materials: ['A股策略报告.pdf','宏观数据.xlsx'] },
+    { id: 'c2', title: '人工智能赋能金融：大模型在投研领域的实践探索', experts: [{name:'李晓峰',inst:'华锐技术'},{name:'孙晓雯',inst:'中金公司'}], tags: ['人工智能','大模型','投研','金融科技','高管'], time: '2026-04-08 15:30', registrations: 256, status: '直播中', desc: '探讨大语言模型在金融投研场景中的落地应用与未来发展趋势。', materials: ['AI投研白皮书.pdf'] },
+    { id: 'c3', title: '债券市场利率走势分析与配置策略', experts: [{name:'王雅婷',inst:'固金证券'}], tags: ['债券','利率','固收','深度专访','金融'], time: '2026-03-29 10:00', registrations: 189, status: '已结束', desc: '分析当前债券市场利率走势，提供机构投资者债券配置建议。', materials: ['利率分析报告.pdf','配置建议.xlsx'] },
+    { id: 'c4', title: '港股科技板块：估值修复与催化剂分析', experts: [{name:'陈志远',inst:'东吴证券'}], tags: ['港股','科技','估值','独家会议','互联网'], time: '2026-03-21 14:00', registrations: 145, status: '已结束', desc: '深入分析港股科技板块的估值修复逻辑及未来催化剂。', materials: ['港股科技报告.pdf'] },
+    { id: 'c5', title: '新能源汽车产业链：竞争格局重塑与投资机会', experts: [{name:'刘思远',inst:'浦发银行投研部'}], tags: ['新能源','汽车','产业链','实地调研','A股'], time: '2026-04-15 09:30', registrations: 412, status: '即将开始', desc: '实地调研新能源汽车产业链，重塑竞争格局下的投资机会分析。', materials: ['产业链图谱.pdf','调研纪要.docx'] },
+    { id: 'c6', title: '宏观经济政策解读：财政发力与货币配合', experts: [{name:'赵文博',inst:'中信建投'},{name:'周建国',inst:'申万宏源'}], tags: ['宏观','财政','货币','政策解读','A股'], time: '2026-04-12 16:00', registrations: 567, status: '即将开始', desc: '解读最新宏观经济政策，分析财政与货币政策的协同效应。', materials: ['政策解读报告.pdf'] },
+    { id: 'c7', title: '量化投资策略：多因子模型的构建与优化', experts: [{name:'周建国',inst:'申万宏源'}], tags: ['量化','因子','程序化','行业调查','金融'], time: '2026-03-15 14:00', registrations: 98, status: '已结束', desc: '分享多因子量化模型的构建方法及实盘优化经验。', materials: ['量化策略报告.pdf','因子库说明.xlsx'] },
+    { id: 'c8', title: '医药行业投资机会：创新药与医疗器械的双轮驱动', experts: [{name:'赵文博',inst:'中信建投'},{name:'孙丽华',inst:'招商证券'}], tags: ['医药','生物','创新药','医疗器械','专家'], time: '2026-04-18 10:00', registrations: 879, status: '直播中', desc: '探讨创新药与医疗器械两大赛道的投资机会与风险。', materials: ['医药行业深度报告.pdf','创新药管线.xlsx'] },
+];
+
+let searchQuery = '';
+let activeFilter = '全部';
+let editingId = null;
+let deletingId = null;
+
+// ============ 导航 ============
+const navLinkMap = {
+    '/experts': 'experts-clone.html',
+    '/conferences': 'conferences.html',
+    '/attendees': 'attendees.html',
+    '/minutes': 'minutes.html',
+    '/collections': 'collections.html',
+    '/topics': 'topics.html',
+    '/stocks': 'stocks.html',
+    '/research': 'research.html',
+    '/users': 'user-management.html',
+    '/source-monitor': 'source-monitor.html',
+    '/user-profile': 'user-profile.html'
+};
+
+function renderNavItem(path, icon, label, isSub, isActive) {
+    const href = navLinkMap[path] || path.replace('/', '') + '.html';
+    if (isSub) {
+        return `<a class="flex items-center h-10 mx-2 mb-0.5 rounded-lg text-sm transition-colors cursor-pointer whitespace-nowrap pl-8 pr-4 ${isActive ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}" href="${href}">
+            <div class="w-3 h-3 flex items-center justify-center mr-1 flex-shrink-0"><i class="ri-corner-down-right-line text-xs text-gray-300"></i></div>
+            <div class="w-5 h-5 flex items-center justify-center flex-shrink-0"><i class="${icon} text-base"></i></div>
+            <span class="ml-2">${label}</span>
+        </a>`;
+    }
+    return `<a class="flex items-center h-10 mx-2 mb-0.5 rounded-lg text-sm transition-colors cursor-pointer whitespace-nowrap px-4 ${isActive ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}" href="${href}">
+        <div class="w-5 h-5 flex items-center justify-center flex-shrink-0"><i class="${icon} text-base"></i></div>
+        <span class="ml-2">${label}</span>
+    </a>`;
+}
+
+function renderNav() {
+    return `
+    <aside class="flex flex-col bg-white border-r border-gray-100 transition-all duration-300 w-56">
+        <div class="flex items-center h-16 px-4 border-b border-gray-100 cursor-pointer select-none">
+            <img alt="财跃星辰" class="w-8 h-8 object-contain flex-shrink-0" src="https://static.readdy.ai/image/3dd3b08e3f41e718a9a692da40c4373e/36a1cddcc28d86e13fb969a9b2232329.png">
+            <span class="ml-2 text-sm font-semibold text-gray-800 whitespace-nowrap">财跃星辰管理平台</span>
+        </div>
+        <nav class="flex-1 py-4 overflow-y-auto">
+            ${renderNavItem('/experts', 'ri-user-star-line', '专家管理', false, false)}
+            ${renderNavItem('/conferences', 'ri-video-chat-line', '专家会议管理', false, true)}
+            ${renderNavItem('/attendees', 'ri-team-line', '会议人员管理', true, false)}
+            ${renderNavItem('/minutes', 'ri-file-text-line', '专家纪要库', false, false)}
+            ${renderNavItem('/collections', 'ri-bookmark-3-line', '精选纪要集', true, false)}
+            ${renderNavItem('/topics', 'ri-pie-chart-line', '话题与板块&产业链', true, false)}
+            ${renderNavItem('/stocks', 'ri-stock-line', '话题与股票清单', true, false)}
+            ${renderNavItem('/research', 'ri-survey-line', '调研活动管理', false, false)}
+            ${renderNavItem('/users', 'ri-group-line', '用户管理', false, false)}
+            ${renderNavItem('/user-profile', 'ri-user-heart-line', '用户画像管理', false, false)}
+            ${renderNavItem('/source-monitor', 'ri-radar-line', '信源监控需求管理', false, false)}
+        </nav>
+        <div class="border-t border-gray-100 p-3">
+            <button class="w-full flex items-center justify-center h-9 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors cursor-pointer">
+                <div class="w-5 h-5 flex items-center justify-center"><i class="ri-arrow-left-s-line text-lg"></i></div>
+            </button>
+        </div>
+    </aside>`;
+}
+
+// ============ 工具函数 ============
+function getStats() {
+    const total = conferences.length;
+    const live = conferences.filter(c => c.status === '直播中').length;
+    const upcoming = conferences.filter(c => c.status === '即将开始').length;
+    const regs = conferences.reduce((s, c) => s + c.registrations, 0);
+    return { total, live, upcoming, regs };
+}
+
+function getFiltered() {
+    return conferences.filter(c => {
+        const matchSearch = !searchQuery || c.title.includes(searchQuery) || c.tags.some(t => t.includes(searchQuery)) || c.experts.some(e => e.name.includes(searchQuery));
+        const matchFilter = activeFilter === '全部' || c.status === activeFilter;
+        return matchSearch && matchFilter;
+    });
+}
+
+function getStatusBadge(s) {
+    const m = { '直播中': 'bg-red-50 text-red-500', '即将开始': 'bg-blue-50 text-blue-500', '已结束': 'bg-gray-100 text-gray-500' };
+    return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${m[s] || 'bg-gray-100 text-gray-500'}">${s}</span>`;
+}
+
+function getFiltered() {
+    return conferences.filter(c => {
+        const matchSearch = !searchQuery || c.title.includes(searchQuery) || c.tags.some(t => t.includes(searchQuery)) || c.experts.some(e => e.name.includes(searchQuery));
+        const matchFilter = activeFilter === '全部' || c.status === activeFilter;
+        return matchSearch && matchFilter;
+    });
+}
+
+// ============ 渲染 ============
+function render() {
+    const stats = getStats();
+    const filtered = getFiltered();
+    const filters = ['全部','直播中','即将开始','已结束'];
+
+    document.getElementById('app').innerHTML = `
+    <div class="flex h-screen bg-gray-50 font-sans overflow-hidden">
+        ${renderNav()}
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 flex-shrink-0">
+                <h1 class="text-base font-semibold text-gray-800">专家会议管理</h1>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 flex items-center justify-center"><i class="ri-notification-3-line text-gray-400 text-lg"></i></div>
+                    <div class="flex items-center gap-2 cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center"><span class="text-xs font-medium text-red-600">管</span></div>
+                        <span class="text-sm text-gray-600">管理员</span>
+                        <div class="w-4 h-4 flex items-center justify-center"><i class="ri-arrow-down-s-line text-gray-400"></i></div>
+                    </div>
+                </div>
+            </header>
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- 看板 -->
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-red-500 bg-red-50"><i class="ri-video-chat-line text-xl"></i></div>
+                        <div><div class="text-2xl font-semibold text-gray-800">${stats.total}</div><div class="text-xs text-gray-400 mt-0.5">会议总数</div></div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-red-500 bg-red-50"><i class="ri-live-line text-xl"></i></div>
+                        <div><div class="text-2xl font-semibold text-gray-800">${stats.live}</div><div class="text-xs text-gray-400 mt-0.5">直播中</div></div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-blue-500 bg-blue-50"><i class="ri-calendar-schedule-line text-xl"></i></div>
+                        <div><div class="text-2xl font-semibold text-gray-800">${stats.upcoming}</div><div class="text-xs text-gray-400 mt-0.5">即将开始</div></div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-lg flex items-center justify-center text-green-500 bg-green-50"><i class="ri-user-add-line text-xl"></i></div>
+                        <div><div class="text-2xl font-semibold text-gray-800">${stats.regs.toLocaleString()}</div><div class="text-xs text-gray-400 mt-0.5">累计报名</div></div>
+                    </div>
+                </div>
+
+                <!-- 筛选 & 操作 -->
+                <div class="bg-white rounded-xl">
+                    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <div class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-gray-400"><i class="ri-search-line text-sm"></i></div>
+                                <input placeholder="搜索会议标题、专家..." class="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg w-60 focus:outline-none focus:border-red-400" value="${searchQuery}" oninput="searchQuery=this.value;render()">
+                            </div>
+                            <div class="flex items-center gap-1 bg-gray-50 rounded-lg p-1">
+                                ${filters.map(f => `<button class="filter-btn px-3 py-1 rounded-md text-sm transition-colors cursor-pointer whitespace-nowrap ${activeFilter===f?'active bg-white text-gray-800 font-medium':'text-gray-500 hover:text-gray-700'}" onclick="activeFilter='${f}';render()">${f}</button>`).join('')}
+                            </div>
+                        </div>
+                        <button onclick="openConferenceModal()" class="px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 cursor-pointer"><i class="ri-add-line"></i>新增会议</button>
+                    </div>
+
+                    <!-- 表格 -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="text-left text-gray-400 border-b border-gray-50">
+                                    <th class="px-5 py-3 font-medium">会议信息</th>
+                                    <th class="px-5 py-3 font-medium">主讲专家</th>
+                                    <th class="px-5 py-3 font-medium">话题标签</th>
+                                    <th class="px-5 py-3 font-medium">开始时间</th>
+                                    <th class="px-5 py-3 font-medium">报名人数</th>
+                                    <th class="px-5 py-3 font-medium">状态</th>
+                                    <th class="px-5 py-3 font-medium">链接资料</th>
+                                    <th class="px-5 py-3 font-medium">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${filtered.map(c => `
+                                <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                    <td class="px-5 py-4">
+                                        <div class="text-gray-800 font-medium max-w-[280px] truncate cursor-pointer hover:text-red-500" onclick="openDetailModal('${c.id}')">${c.title}</div>
+                                    </td>
+                                    <td class="px-5 py-4">
+                                        <div class="flex flex-col gap-1">
+                                            ${c.experts.map(e => `<span class="text-gray-600">${e.name} <span class="text-gray-400 text-xs">${e.inst}</span></span>`).join('')}
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-4">
+                                        <div class="flex flex-wrap gap-1">
+                                            ${c.tags.slice(0,2).map(t => `<span class="px-2 py-0.5 rounded-md bg-gray-50 text-gray-500 text-xs">${t}</span>`).join('')}
+                                            ${c.tags.length > 2 ? `<span class="px-2 py-0.5 rounded-md bg-gray-50 text-gray-400 text-xs">+${c.tags.length-2}</span>` : ''}
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-4 text-gray-600">${c.time}</td>
+                                    <td class="px-5 py-4 text-gray-600">${c.registrations} 人</td>
+                                    <td class="px-5 py-4">${getStatusBadge(c.status)}</td>
+                                    <td class="px-5 py-4">
+                                        <button onclick="openDetailModal('${c.id}')" class="text-red-500 hover:text-red-600 text-xs flex items-center gap-1 cursor-pointer"><i class="ri-attachment-line"></i>${c.materials.length}个文件</button>
+                                    </td>
+                                    <td class="px-5 py-4">
+                                        <div class="flex items-center gap-2">
+                                            ${c.status === '直播中' ? `<button class="px-2.5 py-1 rounded-md bg-red-50 text-red-500 text-xs hover:bg-red-100 transition-colors cursor-pointer flex items-center gap-1"><i class="ri-live-line"></i>直播</button>` : ''}
+                                            <button onclick="openConferenceModal('${c.id}')" class="px-2.5 py-1 rounded-md bg-gray-50 text-gray-600 text-xs hover:bg-gray-100 transition-colors cursor-pointer">编辑</button>
+                                            <button onclick="openDeleteModal('${c.id}')" class="px-2.5 py-1 rounded-md bg-gray-50 text-gray-600 text-xs hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer">删除</button>
+                                        </div>
+                                    </td>
+                                </tr>`).join('')}
+                            </tbody>
+                        </table>
+                        ${filtered.length === 0 ? '<div class="py-16 text-center text-gray-400"><i class="ri-inbox-line text-4xl mb-2 block"></i>暂无数据</div>' : ''}
+                    </div>
+                    <div class="px-5 py-3 border-t border-gray-50 text-sm text-gray-400">共 ${filtered.length} 条记录</div>
+                </div>
+            </main>
+        </div>
+    </div>`;
+}
+
+// ============ 弹窗 ============
+function openConferenceModal(id) {
+    editingId = id || null;
+    const c = id ? conferences.find(x => x.id === id) : null;
+    document.getElementById('conferenceModalTitle').textContent = c ? '编辑会议' : '新增会议';
+    document.getElementById('conferenceModalBody').innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">会议标题</label>
+                <input id="mTitle" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400" value="${c?c.title:''}" placeholder="输入会议标题">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">主讲专家</label>
+                <input id="mExpert" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400" value="${c?c.experts.map(e=>e.name).join('、'):''}" placeholder="输入专家姓名，多人用顿号分隔">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">话题标签</label>
+                <input id="mTags" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400" value="${c?c.tags.join('、'):''}" placeholder="输入标签，多个用顿号分隔">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">开始时间</label>
+                    <input id="mTime" type="datetime-local" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400" value="${c?c.time.replace(' ','T'):''}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">状态</label>
+                    <select id="mStatus" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400">
+                        <option value="即将开始" ${c&&c.status==='即将开始'?'selected':''}>即将开始</option>
+                        <option value="直播中" ${c&&c.status==='直播中'?'selected':''}>直播中</option>
+                        <option value="已结束" ${c&&c.status==='已结束'?'selected':''}>已结束</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">会议简介</label>
+                <textarea id="mDesc" rows="3" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400 resize-none" placeholder="输入会议简介">${c?c.desc:''}</textarea>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeConferenceModal()" class="flex-1 h-10 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm cursor-pointer">取消</button>
+                <button onclick="saveConference()" class="flex-1 h-10 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors text-sm cursor-pointer">保存</button>
+            </div>
+        </div>`;
+    showModal('conferenceModal');
+}
+
+function saveConference() {
+    const title = document.getElementById('mTitle').value.trim();
+    const expert = document.getElementById('mExpert').value.trim();
+    const tags = document.getElementById('mTags').value.trim();
+    const time = document.getElementById('mTime').value.replace('T',' ');
+    const status = document.getElementById('mStatus').value;
+    const desc = document.getElementById('mDesc').value.trim();
+    if (!title) { alert('请输入会议标题'); return; }
+
+    if (editingId) {
+        const c = conferences.find(x => x.id === editingId);
+        if (c) { c.title = title; c.experts = expert ? [{name:expert.split('、')[0],inst:expert.split('、')[1]||'待定'}] : []; c.tags = tags ? tags.split('、') : []; c.time = time; c.status = status; c.desc = desc; }
+    } else {
+        conferences.unshift({ id: 'c'+Date.now(), title, experts: expert ? [{name:expert.split('、')[0],inst:expert.split('、')[1]||'待定'}] : [], tags: tags ? tags.split('、') : [], time, status, registrations: 0, desc, materials: [] });
+    }
+    closeConferenceModal();
+    render();
+}
+
+function openDeleteModal(id) {
+    deletingId = id;
+    showModal('deleteModal');
+}
+
+function confirmDelete() {
+    conferences = conferences.filter(c => c.id !== deletingId);
+    closeDeleteModal();
+    render();
+}
+
+function openDetailModal(id) {
+    const c = conferences.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('detailModalBody').innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <div class="text-xs text-gray-400 mb-1">会议标题</div>
+                <div class="text-gray-800 font-medium">${c.title}</div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <div class="text-xs text-gray-400 mb-1">主讲专家</div>
+                    <div class="text-gray-600">${c.experts.map(e=>e.name+' ('+e.inst+')').join('、') || '暂无'}</div>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-400 mb-1">状态</div>
+                    ${getStatusBadge(c.status)}
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <div class="text-xs text-gray-400 mb-1">开始时间</div>
+                    <div class="text-gray-600">${c.time}</div>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-400 mb-1">报名人数</div>
+                    <div class="text-gray-600">${c.registrations} 人</div>
+                </div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 mb-1">话题标签</div>
+                <div class="flex flex-wrap gap-1">${c.tags.map(t=>`<span class="px-2 py-0.5 rounded-md bg-gray-50 text-gray-500 text-xs">${t}</span>`).join('')}</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 mb-1">会议简介</div>
+                <div class="text-gray-600 text-sm">${c.desc}</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 mb-1">链接资料</div>
+                <div class="space-y-1">${c.materials.map(m=>`<div class="flex items-center gap-2 text-sm text-gray-600"><i class="ri-file-text-line text-gray-400"></i>${m}</div>`).join('') || '<span class="text-gray-400 text-sm">暂无资料</span>'}</div>
+            </div>
+        </div>`;
+    showModal('detailModal');
+}
+
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+function showModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+function closeConferenceModal() { closeModal('conferenceModal'); editingId = null; }
+function closeDeleteModal() { closeModal('deleteModal'); deletingId = null; }
+function closeDetailModal() { closeModal('detailModal'); }
+
+// ============ 初始化 ============
+render();
+</script>
+</body>
+</html>

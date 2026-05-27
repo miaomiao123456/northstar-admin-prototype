@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北极星管理平台 - 专家管理</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .filter-btn.active { background: white; color: #1f2937; font-weight: 500; }
+        .modal-backdrop { background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(2px); }
+        .progress-bar { height: 6px; border-radius: 999px; background: #f3f4f6; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 999px; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div id="app"></div>
+
+    <!-- 详情弹窗 -->
+    <div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between p-5 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">专家详情</h3>
+                <button onclick="closeDetailModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><i class="ri-close-line text-xl"></i></button>
+            </div>
+            <div id="detailContent" class="p-5"></div>
+        </div>
+    </div>
+
+    <!-- 编辑弹窗 -->
+    <div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between p-5 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900" id="editModalTitle">编辑专家</h3>
+                <button onclick="closeEditModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><i class="ri-close-line text-xl"></i></button>
+            </div>
+            <div id="editContent" class="p-5"></div>
+        </div>
+    </div>
+
+    <!-- 删除弹窗 -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4">
+            <div class="p-5 text-center">
+                <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3"><i class="ri-delete-bin-line text-xl text-red-500"></i></div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">删除确认</h3>
+                <p id="deleteExpertName" class="text-gray-500 text-sm">确定要删除该专家吗？此操作不可恢复。</p>
+            </div>
+            <div class="flex gap-3 p-5 pt-0">
+                <button onclick="closeDeleteModal()" class="flex-1 h-10 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm">取消</button>
+                <button onclick="confirmDelete()" class="flex-1 h-10 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors text-sm">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ============ 数据 ============
+let experts = [
+    { id: 'e1', name: '张明远', title: '首席策略分析师', institution: '国泰海通证券', specialties: ['A股', '策略', '宏观'], accuracy: 87, score: 9.2, meetings: 12, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zm' },
+    { id: 'e2', name: '李晓峰', title: '人工智能研究院', institution: '华锐技术', specialties: ['人工智能', '大模型', '投研'], accuracy: 82, score: 8.8, meetings: 8, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=lx' },
+    { id: 'e3', name: '王雅婷', title: '固收研究总监', institution: '固金证券', specialties: ['债券', '利率', '固收'], accuracy: 91, score: 9.5, meetings: 15, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=wy' },
+    { id: 'e4', name: '陈志远', title: '港股研究主管', institution: '东吴证券', specialties: ['港股', '科技', '估值'], accuracy: 79, score: 8.4, meetings: 9, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=cz' },
+    { id: 'e5', name: '刘思远', title: '新能源行业顶尖', institution: '浦发银行投研部', specialties: ['新能源', '汽车', '产业链'], accuracy: 85, score: 8.9, meetings: 6, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ls' },
+    { id: 'e6', name: '赵文博', title: '医药首席分析师', institution: '中信建投', specialties: ['医药', '生物', '创新药'], accuracy: 84, score: 8.7, meetings: 11, status: '取消', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zw' },
+    { id: 'e7', name: '孙丽华', title: '消费行业研究员', institution: '招商证券', specialties: ['消费', '零售', '食品饮料'], accuracy: 88, score: 9.0, meetings: 10, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sl' },
+    { id: 'e8', name: '周建国', title: '量化策略总监', institution: '申万宏源', specialties: ['量化', '因子', '程序化'], accuracy: 80, score: 8.5, meetings: 7, status: '取消', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zj' },
+];
+
+let searchQuery = '';
+let activeFilter = '全部';
+let editingExpertId = null;
+let deletingExpertId = null;
+let viewingExpertId = null;
+
+// ============ 导航链接映射 ============
+const navLinkMap = {
+    '/experts': 'experts-clone.html',
+    '/conferences': 'conferences.html',
+    '/attendees': 'attendees.html',
+    '/minutes': 'minutes.html',
+    '/collections': 'collections.html',
+    '/topics': 'topics.html',
+    '/stocks': 'stocks.html',
+    '/research': 'research.html',
+    '/users': 'user-management.html',
+    '/source-monitor': 'source-monitor.html',
+    '/user-profile': 'user-profile.html'
+};
+
+function renderNavItem(path, icon, label, isSub, isActive) {
+    const href = navLinkMap[path] || path.replace('/', '') + '.html';
+    if (isSub) {
+        return `<a class="flex items-center h-10 mx-2 mb-0.5 rounded-lg text-sm transition-colors cursor-pointer whitespace-nowrap pl-8 pr-4 ${isActive ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}" href="${href}">
+            <div class="w-3 h-3 flex items-center justify-center mr-1 flex-shrink-0"><i class="ri-corner-down-right-line text-xs text-gray-300"></i></div>
+            <div class="w-5 h-5 flex items-center justify-center flex-shrink-0"><i class="${icon} text-base"></i></div>
+            <span class="ml-2">${label}</span>
+        </a>`;
+    }
+    return `<a class="flex items-center h-10 mx-2 mb-0.5 rounded-lg text-sm transition-colors cursor-pointer whitespace-nowrap px-4 ${isActive ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}" href="${href}">
+        <div class="w-5 h-5 flex items-center justify-center flex-shrink-0"><i class="${icon} text-base"></i></div>
+        <span class="ml-2">${label}</span>
+    </a>`;
+}
+
+// ============ 工具函数 ============
+function getStats() {
+    const total = experts.length;
+    const active = experts.filter(e => e.status === '启用').length;
+    const totalMeetings = experts.reduce((sum, e) => sum + e.meetings, 0);
+    const avgScore = total > 0 ? (experts.reduce((sum, e) => sum + e.score, 0) / total).toFixed(1) : '0.0';
+    return { total, active, totalMeetings, avgScore };
+}
+
+function getFilteredExperts() {
+    return experts.filter(e => {
+        const matchSearch = !searchQuery || e.name.includes(searchQuery) || e.institution.includes(searchQuery) || e.title.includes(searchQuery);
+        const matchFilter = activeFilter === '全部' || e.status === activeFilter;
+        return matchSearch && matchFilter;
+    });
+}
+
+function getAccuracyColor(val) {
+    if (val >= 90) return 'bg-green-500';
+    if (val >= 80) return 'bg-orange-400';
+    return 'bg-red-400';
+}
+
+function getAccuracyTextColor(val) {
+    if (val >= 90) return 'text-green-600';
+    if (val >= 80) return 'text-orange-500';
+    return 'text-red-500';
+}
+
+function getStatusBadge(status) {
+    if (status === '启用') {
+        return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-600">启用</span>';
+    }
+    return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-500">取消</span>';
+}
+
+function renderStars(score) {
+    const full = Math.floor(score);
+    const hasHalf = score - full >= 0.5;
+    let html = '';
+    for (let i = 0; i < full; i++) html += '<i class="ri-star-fill text-yellow-400 text-xs"></i>';
+    if (hasHalf) html += '<i class="ri-star-half-fill text-yellow-400 text-xs"></i>';
+    for (let i = full + (hasHalf ? 1 : 0); i < 5; i++) html += '<i class="ri-star-line text-gray-300 text-xs"></i>';
+    return html;
+}
+
+// ============ 渲染 ============
+function render() {
+    const stats = getStats();
+    const filtered = getFilteredExperts();
+    const app = document.getElementById('app');
+
+    app.innerHTML = `
+    <div class="flex h-screen bg-gray-50 font-sans overflow-hidden">
+        <!-- 侧边栏 -->
+        <aside class="flex flex-col bg-white border-r border-gray-100 transition-all duration-300 w-56 flex-shrink-0">
+            <div class="flex items-center h-16 px-4 border-b border-gray-100 cursor-pointer select-none">
+                <img alt="财跃星辰" class="w-8 h-8 object-contain flex-shrink-0" src="https://static.readdy.ai/image/3dd3b08e3f41e718a9a692da40c4373e/36a1cddcc28d86e13fb969a9b2232329.png">
+                <span class="ml-2 text-sm font-semibold text-gray-800 whitespace-nowrap">北极星管理平台</span>
+            </div>
+            <nav class="flex-1 py-4 overflow-y-auto">
+                ${renderNavItem('/experts', 'ri-user-star-line', '专家管理', false, true)}
+                ${renderNavItem('/conferences', 'ri-video-chat-line', '专家会议管理', false, false)}
+                ${renderNavItem('/attendees', 'ri-team-line', '会议人员管理', true, false)}
+                ${renderNavItem('/minutes', 'ri-file-text-line', '专家纪要库', false, false)}
+                ${renderNavItem('/collections', 'ri-bookmark-3-line', '精选纪要集', true, false)}
+                ${renderNavItem('/topics', 'ri-pie-chart-line', '话题与板块&产业链', true, false)}
+                ${renderNavItem('/stocks', 'ri-stock-line', '话题与股票清单', true, false)}
+                ${renderNavItem('/research', 'ri-survey-line', '调研活动管理', false, false)}
+                ${renderNavItem('/users', 'ri-group-line', '用户审核管理', false, false)}
+                ${renderNavItem('/user-profile', 'ri-user-heart-line', '用户画像管理', false, false)}
+                ${renderNavItem('/source-monitor', 'ri-radar-line', '信源监控需求管理', false, false)}
+            </nav>
+            <div class="border-t border-gray-100 p-3">
+                <button class="w-full flex items-center justify-center h-9 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors text-sm">
+                    <i class="ri-arrow-left-line mr-1.5 text-sm"></i>返回工作台
+                </button>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- 顶部栏 -->
+            <header class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-8 flex-shrink-0">
+                <h1 class="text-xl font-semibold text-gray-900">专家管理</h1>
+                <div class="flex items-center gap-5">
+                    <button class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-colors relative">
+                        <i class="ri-notification-3-line text-lg"></i>
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                    <div class="flex items-center gap-2 cursor-pointer">
+                        <div class="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center text-red-600 text-sm font-medium border border-red-100">管</div>
+                        <span class="text-sm text-gray-700 font-medium">管理员</span>
+                        <i class="ri-arrow-down-s-line text-gray-400 text-xs"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 可滚动内容 -->
+            <main class="flex-1 overflow-y-auto p-8">
+                <!-- 看板 -->
+                <div class="grid grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl p-5 border border-gray-100">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center"><i class="ri-user-star-line text-red-500 text-lg"></i></div>
+                            <span class="text-2xl font-bold text-gray-900">${stats.total}</span>
+                        </div>
+                        <p class="text-sm text-gray-500">专家总数</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 border border-gray-100">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center"><i class="ri-check-line text-green-500 text-lg"></i></div>
+                            <span class="text-2xl font-bold text-gray-900">${stats.active}</span>
+                        </div>
+                        <p class="text-sm text-gray-500">启用中</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 border border-gray-100">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center"><i class="ri-calendar-event-line text-orange-500 text-lg"></i></div>
+                            <span class="text-2xl font-bold text-gray-900">${stats.totalMeetings}</span>
+                        </div>
+                        <p class="text-sm text-gray-500">累计会议场次</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 border border-gray-100">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center"><i class="ri-star-line text-yellow-500 text-lg"></i></div>
+                            <span class="text-2xl font-bold text-gray-900">${stats.avgScore}</span>
+                        </div>
+                        <p class="text-sm text-gray-500">平均综合评分</p>
+                    </div>
+                </div>
+
+                <!-- 搜索与筛选 -->
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="relative flex-1 max-w-sm">
+                        <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="searchInput" placeholder="搜索专家姓名、机构..." value="${searchQuery}" class="w-full h-10 pl-10 pr-4 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50 bg-white" oninput="handleSearch(this.value)">
+                    </div>
+                    <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                        <button class="filter-btn px-4 h-8 rounded-md text-sm transition-all ${activeFilter === '全部' ? 'active shadow-sm' : 'text-gray-500 hover:text-gray-700'}" onclick="setFilter('全部')">全部</button>
+                        <button class="filter-btn px-4 h-8 rounded-md text-sm transition-all ${activeFilter === '启用' ? 'active shadow-sm' : 'text-gray-500 hover:text-gray-700'}" onclick="setFilter('启用')">启用</button>
+                        <button class="filter-btn px-4 h-8 rounded-md text-sm transition-all ${activeFilter === '取消' ? 'active shadow-sm' : 'text-gray-500 hover:text-gray-700'}" onclick="setFilter('取消')">取消</button>
+                    </div>
+                    <div class="flex-1"></div>
+                    <button onclick="openAddModal()" class="h-10 px-5 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors flex items-center gap-1.5">
+                        <i class="ri-add-line text-base"></i>新增专家
+                    </button>
+                </div>
+
+                <!-- 表格 -->
+                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-100">
+                                <th class="text-left text-xs font-medium text-gray-400 uppercase tracking-wider px-6 py-3.5">专家信息</th>
+                                <th class="text-left text-xs font-medium text-gray-400 uppercase tracking-wider px-6 py-3.5">所属机构</th>
+                                <th class="text-left text-xs font-medium text-gray-400 uppercase tracking-wider px-6 py-3.5">擅长领域</th>
+                                <th class="text-left text-xs font-medium text-gray-400 uppercase tracking-wider px-6 py-3.5">观点准确率</th>
+                                <th class="text-left text-xs font-medium text-gray-400 uppercase tracking-wider px-6 py-3.5">综合评分</th>
+                                <th class="text-left text-xs font-medium text-gray-400 uppercase tracking-wider px-6 py-3.5">会议场次</th>
+                                <th class="text-left text-xs font-medium text-gray-400 uppercase tracking-wider px-6 py-3.5">状态</th>
+                                <th class="text-left text-xs font-medium text-gray-400 uppercase tracking-wider px-6 py-3.5">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            ${filtered.map(e => `
+                            <tr class="hover:bg-gray-50/50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                                            <img src="${e.avatar}" class="w-full h-full object-cover" alt="${e.name}">
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900">${e.name}</p>
+                                            <p class="text-xs text-gray-400">${e.title}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600">${e.institution}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-wrap gap-1.5">
+                                        ${e.specialties.map(s => `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">${s}</span>`).join('')}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="progress-bar w-20 flex-shrink-0">
+                                            <div class="progress-fill ${getAccuracyColor(e.accuracy)}" style="width: ${e.accuracy}%"></div>
+                                        </div>
+                                        <span class="text-sm font-medium ${getAccuracyTextColor(e.accuracy)}">${e.accuracy}%</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-1.5">
+                                        ${renderStars(e.score)}
+                                        <span class="text-sm font-medium text-gray-700 ml-1">${e.score}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600">${e.meetings}场</td>
+                                <td class="px-6 py-4">${getStatusBadge(e.status)}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2 text-sm">
+                                        <button onclick="openDetailModal('${e.id}')" class="text-gray-500 hover:text-red-500 transition-colors">详情</button>
+                                        <span class="text-gray-200">|</span>
+                                        <button onclick="openEditModal('${e.id}')" class="text-gray-500 hover:text-red-500 transition-colors">编辑</button>
+                                        <span class="text-gray-200">|</span>
+                                        <button onclick="toggleStatus('${e.id}')" class="${e.status === '启用' ? 'text-red-500 hover:text-red-600' : 'text-green-500 hover:text-green-600'} transition-colors">${e.status === '启用' ? '取消' : '启用'}</button>
+                                        <span class="text-gray-200">|</span>
+                                        <button onclick="openDeleteModal('${e.id}')" class="text-red-400 hover:text-red-600 transition-colors">删除</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    ${filtered.length === 0 ? '<div class="py-16 text-center text-gray-400 text-sm">暂无数据</div>' : ''}
+                </div>
+            </main>
+        </div>
+    </div>`;
+}
+
+// ============ 交互 ============
+function handleSearch(val) { searchQuery = val.trim(); render(); }
+function setFilter(f) { activeFilter = f; render(); }
+
+function toggleStatus(id) {
+    const e = experts.find(x => x.id === id);
+    if (e) {
+        e.status = e.status === '启用' ? '取消' : '启用';
+        render();
+    }
+}
+
+// ============ 详情弹窗 ============
+function openDetailModal(id) {
+    viewingExpertId = id;
+    const e = experts.find(x => x.id === id);
+    if (!e) return;
+    document.getElementById('detailContent').innerHTML = `
+        <div class="flex items-center gap-4 mb-5">
+            <div class="w-16 h-16 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                <img src="${e.avatar}" class="w-full h-full object-cover" alt="${e.name}">
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold text-gray-900">${e.name}</h4>
+                <p class="text-sm text-gray-500">${e.title} · ${e.institution}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-sm text-gray-500">擅长领域</span>
+                <div class="flex gap-1.5">${e.specialties.map(s => `<span class="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">${s}</span>`).join('')}</div>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-sm text-gray-500">观点准确率</span>
+                <div class="flex items-center gap-2">
+                    <div class="progress-bar w-24"><div class="progress-fill ${getAccuracyColor(e.accuracy)}" style="width: ${e.accuracy}%"></div></div>
+                    <span class="text-sm font-medium ${getAccuracyTextColor(e.accuracy)}">${e.accuracy}%</span>
+                </div>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-sm text-gray-500">综合评分</span>
+                <div class="flex items-center gap-1">${renderStars(e.score)}<span class="text-sm font-medium text-gray-700 ml-1">${e.score}</span></div>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-sm text-gray-500">会议场次</span>
+                <span class="text-sm font-medium text-gray-900">${e.meetings}场</span>
+            </div>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-sm text-gray-500">状态</span>
+                <div>${getStatusBadge(e.status)}</div>
+            </div>
+        </div>
+        <div class="mt-6 flex justify-end gap-3">
+            <button onclick="closeDetailModal()" class="h-10 px-5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm">关闭</button>
+            <button onclick="closeDetailModal();openEditModal('${e.id}')" class="h-10 px-5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors text-sm">编辑</button>
+        </div>
+    `;
+    const modal = document.getElementById('detailModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+function closeDetailModal() {
+    const modal = document.getElementById('detailModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    viewingExpertId = null;
+}
+
+// ============ 编辑/新增弹窗 ============
+function openEditModal(id) {
+    editingExpertId = id;
+    const isNew = !id;
+    const e = isNew ? { name: '', title: '', institution: '', specialties: [], accuracy: 80, score: 8.0, meetings: 0, status: '启用', avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}` } : experts.find(x => x.id === id);
+    if (!e) return;
+
+    document.getElementById('editModalTitle').textContent = isNew ? '新增专家' : '编辑专家';
+    document.getElementById('editContent').innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">姓名</label>
+                <input type="text" id="editName" value="${e.name}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">职位</label>
+                <input type="text" id="editTitle" value="${e.title}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">所属机构</label>
+                <input type="text" id="editInstitution" value="${e.institution}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">擅长领域（用逗号分隔）</label>
+                <input type="text" id="editSpecialties" value="${e.specialties.join('，')}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">观点准确率 %</label>
+                    <input type="number" id="editAccuracy" value="${e.accuracy}" min="0" max="100" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">综合评分</label>
+                    <input type="number" id="editScore" value="${e.score}" min="0" max="10" step="0.1" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">会议场次</label>
+                    <input type="number" id="editMeetings" value="${e.meetings}" min="0" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">状态</label>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="editStatus" value="启用" ${e.status === '启用' ? 'checked' : ''} class="accent-red-500">
+                        <span class="text-sm text-gray-700">启用</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="editStatus" value="取消" ${e.status === '取消' ? 'checked' : ''} class="accent-red-500">
+                        <span class="text-sm text-gray-700">取消</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="mt-6 flex justify-end gap-3">
+            <button onclick="closeEditModal()" class="h-10 px-5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm">取消</button>
+            <button onclick="saveExpert()" class="h-10 px-5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors text-sm">保存</button>
+        </div>
+    `;
+    const modal = document.getElementById('editModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+function openAddModal() { openEditModal(null); }
+function closeEditModal() {
+    const modal = document.getElementById('editModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    editingExpertId = null;
+}
+function saveExpert() {
+    const name = document.getElementById('editName').value.trim();
+    const title = document.getElementById('editTitle').value.trim();
+    const institution = document.getElementById('editInstitution').value.trim();
+    const specialties = document.getElementById('editSpecialties').value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+    const accuracy = parseInt(document.getElementById('editAccuracy').value) || 0;
+    const score = parseFloat(document.getElementById('editScore').value) || 0;
+    const meetings = parseInt(document.getElementById('editMeetings').value) || 0;
+    const status = document.querySelector('input[name="editStatus"]:checked')?.value || '启用';
+
+    if (!name || !institution) {
+        alert('请填写姓名和所属机构');
+        return;
+    }
+
+    if (editingExpertId) {
+        const idx = experts.findIndex(e => e.id === editingExpertId);
+        if (idx > -1) {
+            experts[idx] = { ...experts[idx], name, title, institution, specialties, accuracy, score, meetings, status };
+        }
+    } else {
+        const newId = 'e' + (Date.now() % 100000);
+        experts.push({ id: newId, name, title, institution, specialties, accuracy, score, meetings, status, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${newId}` });
+    }
+    closeEditModal();
+    render();
+}
+
+// ============ 删除弹窗 ============
+function openDeleteModal(id) {
+    deletingExpertId = id;
+    const e = experts.find(x => x.id === id);
+    document.getElementById('deleteExpertName').textContent = e ? `确定要删除专家「${e.name}」吗？此操作不可恢复。` : '确定要删除该专家吗？此操作不可恢复。';
+    const modal = document.getElementById('deleteModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    deletingExpertId = null;
+}
+function confirmDelete() {
+    const idx = experts.findIndex(e => e.id === deletingExpertId);
+    if (idx > -1) {
+        experts.splice(idx, 1);
+    }
+    closeDeleteModal();
+    render();
+}
+
+// ============ 点击弹窗外部关闭 ============
+document.getElementById('detailModal').addEventListener('click', function(e) { if (e.target === this) closeDetailModal(); });
+document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEditModal(); });
+document.getElementById('deleteModal').addEventListener('click', function(e) { if (e.target === this) closeDeleteModal(); });
+
+// ============ 初始渲染 ============
+render();
+</script>
+</body>
+</html>

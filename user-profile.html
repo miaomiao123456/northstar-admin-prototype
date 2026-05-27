@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北极星管理平台 - 用户画像管理</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .filter-btn.active {
+            background: white;
+            color: #1f2937;
+            font-weight: 500;
+        }
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(2px);
+        }
+        .online-dot {
+            width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px;
+        }
+        .online-dot.green { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.15); }
+        .online-dot.gray { background: #d1d5db; }
+        .week-bar { height: 6px; border-radius: 3px; transition: width 0.3s; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div id="app"></div>
+
+    <!-- 用户详情弹窗 -->
+    <div id="userDetailModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-2xl shadow-xl w-[480px] max-w-[90vw]">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-base font-semibold text-gray-800">用户详细信息</h3>
+                <button onclick="closeModal('userDetailModal')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                    <i class="ri-close-line text-gray-400 text-lg"></i>
+                </button>
+            </div>
+            <div class="px-6 py-5" id="userDetailBody"></div>
+        </div>
+    </div>
+
+    <!-- 在线状态弹窗 -->
+    <div id="onlineModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-2xl shadow-xl w-[420px] max-w-[90vw]">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-base font-semibold text-gray-800">本周在线详情</h3>
+                <button onclick="closeModal('onlineModal')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                    <i class="ri-close-line text-gray-400 text-lg"></i>
+                </button>
+            </div>
+            <div class="px-6 py-5" id="onlineModalBody"></div>
+        </div>
+    </div>
+
+    <!-- 参会状态弹窗 -->
+    <div id="meetingModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-2xl shadow-xl w-[520px] max-w-[90vw]">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-base font-semibold text-gray-800">参会状态详情</h3>
+                <button onclick="closeModal('meetingModal')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                    <i class="ri-close-line text-gray-400 text-lg"></i>
+                </button>
+            </div>
+            <div class="px-6 py-5" id="meetingModalBody"></div>
+        </div>
+    </div>
+
+    <!-- 预约详情弹窗 -->
+    <div id="appointmentModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-2xl shadow-xl w-[520px] max-w-[90vw]">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-base font-semibold text-gray-800">预约会议详情</h3>
+                <button onclick="closeModal('appointmentModal')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                    <i class="ri-close-line text-gray-400 text-lg"></i>
+                </button>
+            </div>
+            <div class="px-6 py-5" id="appointmentModalBody"></div>
+        </div>
+    </div>
+
+    <!-- 监控需求弹窗 -->
+    <div id="demandModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-2xl shadow-xl w-[560px] max-w-[90vw]">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-base font-semibold text-gray-800">监控需求详情</h3>
+                <button onclick="closeModal('demandModal')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                    <i class="ri-close-line text-gray-400 text-lg"></i>
+                </button>
+            </div>
+            <div class="px-6 py-5" id="demandModalBody"></div>
+        </div>
+    </div>
+
+    <script>
+    // ============ 用户画像数据 ============
+    const users = [
+        { id: 'u1', name: '王建华', position: '基金经理', company: '华夏基金', phone: '138****8801', email: 'wjh@chinaamc.com', online: true, inMeeting: true, usingWorkbench: false, weekOnline: { '周一': 6.5, '周二': 8.0, '周三': 7.5, '周四': 5.0, '周五': 3.0, '周六': 0, '周日': 0 }, currentMeeting: '新能源产业链深度研讨会', totalMeetings: 47, appointments: [{ title: '半导体行业季度策略会', date: '2026-05-28 14:00', status: 'confirmed' }, { title: 'AI算力产业链调研', date: '2026-05-29 09:30', status: 'pending' }], demands: [{ title: '新增万得宏观经济数据库接入', status: 'pending' }] },
+        { id: 'u2', name: '李梦琪', position: '研究员', company: '南方基金', phone: '139****2234', email: 'lmq@nfund.com', online: true, inMeeting: false, usingWorkbench: true, weekOnline: { '周一': 7.0, '周二': 6.5, '周三': 8.0, '周四': 7.0, '周五': 6.0, '周六': 1.5, '周日': 0 }, currentMeeting: null, totalMeetings: 32, appointments: [{ title: '消费板块半年度策略会', date: '2026-05-30 10:00', status: 'confirmed' }], demands: [{ title: '对接同花顺iFind研报推送', status: 'pending' }, { title: '增加行业ETF资金流向分析', status: 'processing' }] },
+        { id: 'u3', name: '张伟', position: '分析师', company: '招商证券', phone: '135****5567', email: 'zw@cmschina.com', online: true, inMeeting: true, usingWorkbench: true, weekOnline: { '周一': 8.5, '周二': 9.0, '周三': 8.0, '周四': 7.5, '周五': 6.5, '周六': 2.0, '周日': 1.0 }, currentMeeting: 'A股市场周度策略讨论', totalMeetings: 68, appointments: [{ title: '券商投研联席会议', date: '2026-05-28 15:30', status: 'confirmed' }, { title: '量化策略回测方案评审', date: '2026-05-30 14:00', status: 'pending' }, { title: '固收市场展望研讨会', date: '2026-06-02 09:00', status: 'confirmed' }], demands: [{ title: '增加东方财富资金流向监控', status: 'processing' }] },
+        { id: 'u4', name: '陈晓燕', position: '投资总监', company: '易方达基金', phone: '136****7890', email: 'cxy@efunds.com', online: false, inMeeting: false, usingWorkbench: false, weekOnline: { '周一': 5.0, '周二': 4.5, '周三': 6.0, '周四': 0, '周五': 0, '周六': 0, '周日': 0 }, currentMeeting: null, totalMeetings: 25, appointments: [{ title: '固收投资月度复盘', date: '2026-06-01 10:00', status: 'pending' }], demands: [{ title: '接入彭博终端债券行情数据', status: 'pending' }] },
+        { id: 'u5', name: '刘强', position: '策略分析师', company: '广发证券', phone: '137****3312', email: 'lq@gf.com.cn', online: true, inMeeting: false, usingWorkbench: true, weekOnline: { '周一': 7.0, '周二': 8.0, '周三': 7.5, '周四': 8.0, '周五': 5.0, '周六': 3.0, '周日': 0 }, currentMeeting: null, totalMeetings: 53, appointments: [{ title: '宏观策略季度汇报', date: '2026-05-29 14:00', status: 'confirmed' }], demands: [{ title: '增加上海证券报新闻舆情监控', status: 'processing' }] },
+        { id: 'u6', name: '赵明', position: '科技行业分析师', company: '中信证券', phone: '180****4456', email: 'zm@citics.com', online: false, inMeeting: false, usingWorkbench: false, weekOnline: { '周一': 6.0, '周二': 5.5, '周三': 0, '周四': 0, '周五': 0, '周六': 0, '周日': 0 }, currentMeeting: null, totalMeetings: 41, appointments: [], demands: [{ title: '接入中证指数行业分类数据', status: 'done' }] },
+        { id: 'u7', name: '孙丽华', position: '基金经理', company: '国泰基金', phone: '181****7723', email: 'slh@guotai.com', online: true, inMeeting: true, usingWorkbench: false, weekOnline: { '周一': 6.0, '周二': 7.0, '周三': 6.5, '周四': 7.5, '周五': 4.0, '周六': 0, '周日': 0 }, currentMeeting: '港股通策略研讨会', totalMeetings: 38, appointments: [{ title: '港股投资策略月度讨论', date: '2026-05-28 10:00', status: 'confirmed' }, { title: 'QDII基金Q2业绩预判会', date: '2026-06-03 15:00', status: 'pending' }], demands: [{ title: '增加港交所实时行情数据', status: 'pending' }] },
+        { id: 'u8', name: '周建国', position: '量化研究员', company: '平安资管', phone: '182****8834', email: 'zjg@pingan.com', online: true, inMeeting: false, usingWorkbench: true, weekOnline: { '周一': 9.0, '周二': 8.5, '周三': 9.0, '周四': 8.0, '周五': 7.0, '周六': 4.0, '周日': 2.0 }, currentMeeting: null, totalMeetings: 19, appointments: [{ title: '量化因子优化讨论', date: '2026-05-30 09:00', status: 'confirmed' }], demands: [{ title: '新增天相投研评级数据整合', status: 'done' }] },
+        { id: 'u9', name: '吴晓峰', position: '研究总监', company: '博时基金', phone: '183****2245', email: 'wxf@boshi.com', online: false, inMeeting: false, usingWorkbench: false, weekOnline: { '周一': 3.0, '周二': 4.0, '周三': 5.0, '周四': 2.0, '周五': 0, '周六': 0, '周日': 0 }, currentMeeting: null, totalMeetings: 55, appointments: [{ title: '利率衍生品策略研讨', date: '2026-05-29 10:00', status: 'confirmed' }], demands: [{ title: '对接IRS利率互换行情数据', status: 'done' }] },
+        { id: 'u10', name: '郑雅婷', position: '基金经理', company: '汇添富基金', phone: '184****5567', email: 'zyt@htfund.com', online: true, inMeeting: false, usingWorkbench: true, weekOnline: { '周一': 7.5, '周二': 8.0, '周三': 7.0, '周四': 6.5, '周五': 5.5, '周六': 1.0, '周日': 0 }, currentMeeting: null, totalMeetings: 29, appointments: [{ title: '私募持仓分析专题会', date: '2026-05-31 14:00', status: 'pending' }, { title: 'ESG投资月度复盘', date: '2026-06-04 10:00', status: 'confirmed' }], demands: [{ title: '增加私募基金持仓数据追踪', status: 'processing' }] },
+        { id: 'u11', name: '黄志远', position: '固收基金经理', company: '工银瑞信', phone: '185****6678', email: 'hzr@icbccs.com', online: true, inMeeting: true, usingWorkbench: true, weekOnline: { '周一': 8.0, '周二': 7.5, '周三': 8.5, '周四': 7.0, '周五': 6.0, '周六': 2.5, '周日': 0 }, currentMeeting: '碳中和投资策略研讨会', totalMeetings: 44, appointments: [{ title: 'ESG碳市场专题研讨会', date: '2026-06-01 14:00', status: 'confirmed' }], demands: [{ title: '接入碳排放权交易市场数据', status: 'pending' }] },
+        { id: 'u12', name: '林思远', position: '债券研究员', company: '建信基金', phone: '186****7789', email: 'lsr@ccb.com', online: false, inMeeting: false, usingWorkbench: false, weekOnline: { '周一': 4.0, '周二': 3.5, '周三': 0, '周四': 0, '周五': 0, '周六': 0, '周日': 0 }, currentMeeting: null, totalMeetings: 16, appointments: [], demands: [{ title: '新增产业链图谱可视化功能', status: 'done' }] },
+    ];
+
+    let currentFilter = 'all';
+    let searchKeyword = '';
+
+    // ============ 统计 ============
+    function getStats() {
+        const onlineCount = users.filter(u => u.online).length;
+        const meetingCount = users.filter(u => u.inMeeting).length;
+        const workbenchCount = users.filter(u => u.usingWorkbench).length;
+        return { onlineCount, meetingCount, workbenchCount };
+    }
+
+    // ============ 过滤 & 搜索 ============
+    function getFilteredUsers() {
+        return users.filter(u => {
+            let matchFilter = currentFilter === 'all';
+            if (currentFilter === 'online') matchFilter = u.online;
+            if (currentFilter === 'meeting') matchFilter = u.inMeeting;
+            if (currentFilter === 'workbench') matchFilter = u.usingWorkbench;
+            const matchSearch = searchKeyword === '' ||
+                u.name.includes(searchKeyword) ||
+                u.company.includes(searchKeyword) ||
+                u.position.includes(searchKeyword);
+            return matchFilter && matchSearch;
+        });
+    }
+
+    // ============ 头像 ============
+    function renderAvatar(name) {
+        const colors = ['bg-red-100 text-red-600', 'bg-blue-100 text-blue-600', 'bg-green-100 text-green-600', 'bg-purple-100 text-purple-600', 'bg-amber-100 text-amber-600', 'bg-pink-100 text-pink-600'];
+        const idx = name.charCodeAt(0) % colors.length;
+        const cls = colors[idx];
+        const initial = name.charAt(name.length - 2) + name.charAt(name.length - 1);
+        return '<div class="w-9 h-9 rounded-full ' + cls + ' flex items-center justify-center flex-shrink-0 text-xs font-medium">' + initial + '</div>';
+    }
+
+    // ============ 状态标签 ============
+    function renderTag(text, color) {
+        return '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ' + color + '">' + text + '</span>';
+    }
+
+    // ============ 侧边栏 ============
+    const navLinkMap = { '/experts': 'experts-clone.html', '/conferences': 'conferences.html', '/attendees': 'attendees.html', '/minutes': 'minutes.html', '/collections': 'collections.html', '/topics': 'topics.html', '/stocks': 'stocks.html', '/research': 'research.html', '/users': 'user-management.html', '/source-monitor': 'source-monitor.html', '/user-profile': 'user-profile.html' };
+    function renderNavItem(path, icon, label, isSub, isActive) {
+        const href = navLinkMap[path] || path.replace('/', '') + '.html';
+        if (isSub) {
+            return '<a class="flex items-center h-10 mx-2 mb-0.5 rounded-lg text-sm transition-colors cursor-pointer whitespace-nowrap pl-8 pr-4 ' + (isActive ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800') + '" href="' + href + '">' +
+                '<div class="w-3 h-3 flex items-center justify-center mr-1 flex-shrink-0"><i class="ri-corner-down-right-line text-xs text-gray-300"></i></div>' +
+                '<div class="w-5 h-5 flex items-center justify-center flex-shrink-0"><i class="' + icon + ' text-base"></i></div>' +
+                '<span class="ml-2">' + label + '</span></a>';
+        }
+        return '<a class="flex items-center h-10 mx-2 mb-0.5 rounded-lg text-sm transition-colors cursor-pointer whitespace-nowrap px-4 ' + (isActive ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800') + '" href="' + href + '">' +
+            '<div class="w-5 h-5 flex items-center justify-center flex-shrink-0"><i class="' + icon + ' text-base"></i></div>' +
+            '<span class="ml-2">' + label + '</span></a>';
+    }
+
+    // ============ 主渲染 ============
+    function render() {
+        const stats = getStats();
+        const filtered = getFilteredUsers();
+        const app = document.getElementById('app');
+
+        app.innerHTML = '<div class="flex h-screen bg-gray-50 font-sans overflow-hidden">' +
+            '<!-- 侧边栏 -->' +
+            '<aside class="flex flex-col bg-white border-r border-gray-100 transition-all duration-300 w-56 flex-shrink-0">' +
+                '<div class="flex items-center h-16 px-4 border-b border-gray-100 cursor-pointer select-none">' +
+                    '<img alt="财跃星辰" class="w-8 h-8 object-contain flex-shrink-0" src="https://static.readdy.ai/image/3dd3b08e3f41e718a9a692da40c4373e/36a1cddcc28d86e13fb969a9b2232329.png">' +
+                    '<span class="ml-2 text-sm font-semibold text-gray-800 whitespace-nowrap">北极星管理平台</span>' +
+                '</div>' +
+                '<nav class="flex-1 py-4 overflow-y-auto">' +
+                    renderNavItem('/experts', 'ri-user-star-line', '专家管理', false, false) +
+                    renderNavItem('/conferences', 'ri-video-chat-line', '专家会议管理', false, false) +
+                    renderNavItem('/attendees', 'ri-team-line', '会议人员管理', true, false) +
+                    renderNavItem('/minutes', 'ri-file-text-line', '专家纪要库', false, false) +
+                    renderNavItem('/collections', 'ri-bookmark-3-line', '精选纪要集', true, false) +
+                    renderNavItem('/topics', 'ri-pie-chart-line', '话题与板块&产业链', true, false) +
+                    renderNavItem('/stocks', 'ri-stock-line', '话题与股票清单', true, false) +
+                    renderNavItem('/research', 'ri-survey-line', '调研活动管理', false, false) +
+                    renderNavItem('/users', 'ri-group-line', '用户审核管理', false, false) +
+                    renderNavItem('/user-profile', 'ri-user-heart-line', '用户画像管理', false, true) +
+                    renderNavItem('/source-monitor', 'ri-radar-line', '信源监控需求管理', false, false) +
+                '</nav>' +
+                '<div class="border-t border-gray-100 p-3">' +
+                    '<button class="w-full flex items-center justify-center h-9 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors cursor-pointer">' +
+                        '<div class="w-5 h-5 flex items-center justify-center"><i class="ri-arrow-left-s-line text-lg"></i></div>' +
+                    '</button>' +
+                '</div>' +
+            '</aside>' +
+
+            '<!-- 主区域 -->' +
+            '<div class="flex-1 flex flex-col overflow-hidden">' +
+                '<header class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 flex-shrink-0">' +
+                    '<h1 class="text-base font-semibold text-gray-800">用户画像管理</h1>' +
+                    '<div class="flex items-center gap-3">' +
+                        '<div class="w-8 h-8 flex items-center justify-center"><i class="ri-notification-3-line text-gray-400 text-lg"></i></div>' +
+                        '<div class="flex items-center gap-2 cursor-pointer">' +
+                            '<div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center"><span class="text-xs font-medium text-red-600">管</span></div>' +
+                            '<span class="text-sm text-gray-600">管理员</span>' +
+                            '<div class="w-4 h-4 flex items-center justify-center"><i class="ri-arrow-down-s-line text-gray-400"></i></div>' +
+                        '</div>' +
+                    '</div>' +
+                '</header>' +
+
+                '<main class="flex-1 overflow-y-auto p-6">' +
+                    '<!-- 看板 -->' +
+                    '<div class="grid grid-cols-3 gap-4 mb-6">' +
+                        '<div class="bg-white rounded-xl p-5 flex items-center gap-4">' +
+                            '<div class="w-11 h-11 rounded-lg flex items-center justify-center text-green-500 bg-green-50">' +
+                                '<i class="ri-user-follow-line text-xl"></i>' +
+                            '</div>' +
+                            '<div>' +
+                                '<div class="text-2xl font-semibold text-gray-800">' + stats.onlineCount + '</div>' +
+                                '<div class="text-xs text-gray-400 mt-0.5">当前在线用户数</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="bg-white rounded-xl p-5 flex items-center gap-4">' +
+                            '<div class="w-11 h-11 rounded-lg flex items-center justify-center text-blue-500 bg-blue-50">' +
+                                '<i class="ri-video-chat-2-line text-xl"></i>' +
+                            '</div>' +
+                            '<div>' +
+                                '<div class="text-2xl font-semibold text-gray-800">' + stats.meetingCount + '</div>' +
+                                '<div class="text-xs text-gray-400 mt-0.5">当前参会人数</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="bg-white rounded-xl p-5 flex items-center gap-4">' +
+                            '<div class="w-11 h-11 rounded-lg flex items-center justify-center text-purple-500 bg-purple-50">' +
+                                '<i class="ri-computer-line text-xl"></i>' +
+                            '</div>' +
+                            '<div>' +
+                                '<div class="text-2xl font-semibold text-gray-800">' + stats.workbenchCount + '</div>' +
+                                '<div class="text-xs text-gray-400 mt-0.5">当前工作台使用人数</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+
+                    '<!-- 表格区域 -->' +
+                    '<div class="bg-white rounded-xl">' +
+                        '<!-- 搜索 & 筛选栏 -->' +
+                        '<div class="flex items-center justify-between px-5 py-4 border-b border-gray-50">' +
+                            '<div class="flex items-center gap-3">' +
+                                '<div class="relative">' +
+                                    '<div class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-gray-400"><i class="ri-search-line text-sm"></i></div>' +
+                                    '<input id="searchInput" placeholder="搜索用户姓名、机构..." class="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg w-64 focus:outline-none focus:border-red-400" value="' + searchKeyword + '">' +
+                                '</div>' +
+                                '<div class="flex items-center gap-1 bg-gray-50 rounded-lg p-1">' +
+                                    '<button class="filter-btn px-3 py-1 rounded-md text-sm transition-colors cursor-pointer whitespace-nowrap text-gray-500 hover:text-gray-700 ' + (currentFilter === 'all' ? 'active' : '') + '" onclick="setFilter(\'all\')">全部</button>' +
+                                    '<button class="filter-btn px-3 py-1 rounded-md text-sm transition-colors cursor-pointer whitespace-nowrap text-gray-500 hover:text-gray-700 ' + (currentFilter === 'online' ? 'active' : '') + '" onclick="setFilter(\'online\')">在线</button>' +
+                                    '<button class="filter-btn px-3 py-1 rounded-md text-sm transition-colors cursor-pointer whitespace-nowrap text-gray-500 hover:text-gray-700 ' + (currentFilter === 'meeting' ? 'active' : '') + '" onclick="setFilter(\'meeting\')">会议中</button>' +
+                                    '<button class="filter-btn px-3 py-1 rounded-md text-sm transition-colors cursor-pointer whitespace-nowrap text-gray-500 hover:text-gray-700 ' + (currentFilter === 'workbench' ? 'active' : '') + '" onclick="setFilter(\'workbench\')">工作台使用中</button>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+
+                        '<!-- 表格 -->' +
+                        '<div class="overflow-x-auto">' +
+                            '<table class="w-full">' +
+                                '<thead>' +
+                                    '<tr class="text-xs text-gray-400 border-b border-gray-50">' +
+                                        '<th class="text-left px-5 py-3 font-medium min-w-[200px]">用户信息</th>' +
+                                        '<th class="text-left px-5 py-3 font-medium min-w-[140px]">所属机构</th>' +
+                                        '<th class="text-left px-5 py-3 font-medium min-w-[100px]">在线状态</th>' +
+                                        '<th class="text-left px-5 py-3 font-medium min-w-[100px]">参会状态</th>' +
+                                        '<th class="text-left px-5 py-3 font-medium min-w-[80px]">预约</th>' +
+                                        '<th class="text-left px-5 py-3 font-medium min-w-[80px]">监控需求</th>' +
+                                    '</tr>' +
+                                '</thead>' +
+                                '<tbody>' +
+                                    (filtered.length === 0 ?
+                                        '<tr><td colspan="6" class="px-5 py-16 text-center text-sm text-gray-400"><i class="ri-inbox-line text-4xl block mb-2 text-gray-300"></i>暂无数据</td></tr>' :
+                                        filtered.map(function(u) {
+                                            return '<tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">' +
+                                                '<td class="px-5 py-4">' +
+                                                    '<div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onclick="showUserDetail(\'' + u.id + '\')">' +
+                                                        renderAvatar(u.name) +
+                                                        '<div>' +
+                                                            '<div class="text-sm font-medium text-gray-800">' + u.name + '</div>' +
+                                                            '<div class="text-xs text-gray-400 mt-0.5">' + u.position + '</div>' +
+                                                        '</div>' +
+                                                    '</div>' +
+                                                '</td>' +
+                                                '<td class="px-5 py-4"><span class="text-sm text-gray-600">' + u.company + '</span></td>' +
+                                                '<td class="px-5 py-4">' +
+                                                    '<div class="flex items-center cursor-pointer hover:opacity-80 transition-opacity" onclick="showOnlineDetail(\'' + u.id + '\')">' +
+                                                        '<span class="online-dot ' + (u.online ? 'green' : 'gray') + '"></span>' +
+                                                        '<span class="text-sm ' + (u.online ? 'text-green-600 font-medium' : 'text-gray-400') + '">' + (u.online ? '在线' : '不在线') + '</span>' +
+                                                    '</div>' +
+                                                '</td>' +
+                                                '<td class="px-5 py-4">' +
+                                                    '<div class="cursor-pointer hover:opacity-80 transition-opacity" onclick="showMeetingDetail(\'' + u.id + '\')">' +
+                                                        (u.inMeeting ?
+                                                            renderTag('参会中', 'bg-blue-50 text-blue-600') :
+                                                            renderTag('未参会', 'bg-gray-100 text-gray-400')) +
+                                                    '</div>' +
+                                                '</td>' +
+                                                '<td class="px-5 py-4">' +
+                                                    '<div class="cursor-pointer hover:opacity-80 transition-opacity" onclick="showAppointmentDetail(\'' + u.id + '\')">' +
+                                                        '<span class="text-sm text-gray-600 font-medium">' + u.appointments.length + '</span>' +
+                                                        (u.appointments.length > 0 ? '<span class="text-xs text-gray-400 ml-1">场</span>' : '') +
+                                                    '</div>' +
+                                                '</td>' +
+                                                '<td class="px-5 py-4">' +
+                                                    '<div class="cursor-pointer hover:opacity-80 transition-opacity" onclick="showDemandDetail(\'' + u.id + '\')">' +
+                                                        '<span class="text-sm text-gray-600 font-medium">' + u.demands.length + '</span>' +
+                                                        (u.demands.length > 0 ? '<span class="text-xs text-gray-400 ml-1">条</span>' : '') +
+                                                    '</div>' +
+                                                '</td>' +
+                                            '</tr>';
+                                        }).join('')) +
+                                '</tbody>' +
+                            '</table>' +
+                        '</div>' +
+
+                        '<!-- 分页 -->' +
+                        '<div class="px-5 py-3 text-xs text-gray-400 border-t border-gray-50 flex items-center justify-between">' +
+                            '<span>共 ' + filtered.length + ' 条记录</span>' +
+                            '<div class="flex items-center gap-1">' +
+                                '<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 cursor-pointer"><i class="ri-arrow-left-s-line"></i></button>' +
+                                '<button class="w-8 h-8 flex items-center justify-center rounded bg-red-500 text-white text-xs font-medium cursor-pointer">1</button>' +
+                                '<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 text-xs text-gray-500 cursor-pointer">2</button>' +
+                                '<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 cursor-pointer"><i class="ri-arrow-right-s-line"></i></button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</main>' +
+            '</div>' +
+        '</div>';
+
+        // 绑定搜索
+        var searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                searchKeyword = e.target.value;
+                render();
+            });
+            if (searchKeyword) {
+                searchInput.focus();
+                searchInput.setSelectionRange(searchKeyword.length, searchKeyword.length);
+            }
+        }
+    }
+
+    // ============ 筛选 ============
+    function setFilter(filter) {
+        currentFilter = filter;
+        render();
+    }
+
+    // ============ 弹窗控制 ============
+    function openModal(id) {
+        var m = document.getElementById(id);
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
+    function closeModal(id) {
+        var m = document.getElementById(id);
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
+
+    // ============ 用户详情弹窗 ============
+    function showUserDetail(userId) {
+        var u = users.find(function(x) { return x.id === userId; });
+        if (!u) return;
+        document.getElementById('userDetailBody').innerHTML =
+            '<div class="flex items-center gap-3 mb-5">' +
+                renderAvatar(u.name) +
+                '<div>' +
+                    '<div class="text-base font-semibold text-gray-800">' + u.name + '</div>' +
+                    '<div class="text-sm text-gray-400">' + u.position + ' · ' + u.company + '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="space-y-3">' +
+                '<div class="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl">' +
+                    '<div class="w-8 h-8 flex items-center justify-center"><i class="ri-user-line text-gray-400"></i></div>' +
+                    '<div><div class="text-xs text-gray-400">姓名</div><div class="text-sm text-gray-800 font-medium">' + u.name + '</div></div>' +
+                '</div>' +
+                '<div class="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl">' +
+                    '<div class="w-8 h-8 flex items-center justify-center"><i class="ri-briefcase-line text-gray-400"></i></div>' +
+                    '<div><div class="text-xs text-gray-400">职位</div><div class="text-sm text-gray-800 font-medium">' + u.position + '</div></div>' +
+                '</div>' +
+                '<div class="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl">' +
+                    '<div class="w-8 h-8 flex items-center justify-center"><i class="ri-building-line text-gray-400"></i></div>' +
+                    '<div><div class="text-xs text-gray-400">所属机构</div><div class="text-sm text-gray-800 font-medium">' + u.company + '</div></div>' +
+                '</div>' +
+                '<div class="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl">' +
+                    '<div class="w-8 h-8 flex items-center justify-center"><i class="ri-phone-line text-gray-400"></i></div>' +
+                    '<div><div class="text-xs text-gray-400">电话</div><div class="text-sm text-gray-800 font-medium">' + u.phone + '</div></div>' +
+                '</div>' +
+                '<div class="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl">' +
+                    '<div class="w-8 h-8 flex items-center justify-center"><i class="ri-mail-line text-gray-400"></i></div>' +
+                    '<div><div class="text-xs text-gray-400">邮箱</div><div class="text-sm text-gray-800 font-medium">' + u.email + '</div></div>' +
+                '</div>' +
+            '</div>';
+        openModal('userDetailModal');
+    }
+
+    // ============ 在线状态弹窗 ============
+    function showOnlineDetail(userId) {
+        var u = users.find(function(x) { return x.id === userId; });
+        if (!u) return;
+        var days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+        var onlineDays = 0;
+        var weekHtml = '<div class="flex items-center gap-3 mb-4">' +
+            renderAvatar(u.name) +
+            '<div>' +
+                '<div class="text-sm font-medium text-gray-800">' + u.name + '</div>' +
+                '<div class="text-xs text-gray-400">' + u.company + '</div>' +
+            '</div>' +
+        '</div>' +
+        '<div class="text-xs text-gray-400 mb-3 font-medium">本周每日在线时长（小时）</div>' +
+        '<div class="space-y-2.5">';
+        days.forEach(function(day) {
+            var hours = u.weekOnline[day] || 0;
+            if (hours > 0) onlineDays++;
+            var barWidth = Math.max(0, Math.min(100, (hours / 10) * 100));
+            var barColor = hours > 6 ? 'bg-green-500' : hours > 3 ? 'bg-amber-400' : hours > 0 ? 'bg-orange-300' : 'bg-gray-200';
+            weekHtml += '<div class="flex items-center gap-3">' +
+                '<span class="text-xs text-gray-500 w-8 text-right">' + day + '</span>' +
+                '<div class="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">' +
+                    '<div class="week-bar ' + barColor + '" style="width: ' + barWidth + '%"></div>' +
+                '</div>' +
+                '<span class="text-xs text-gray-500 w-10">' + (hours > 0 ? hours.toFixed(1) + 'h' : '-') + '</span>' +
+            '</div>';
+        });
+        weekHtml += '</div>' +
+            '<div class="mt-4 px-4 py-3 bg-green-50 rounded-xl flex items-center gap-2">' +
+                '<i class="ri-calendar-check-line text-green-500"></i>' +
+                '<span class="text-sm text-green-700">本周在线 <strong>' + onlineDays + '</strong> 天</span>' +
+            '</div>';
+        document.getElementById('onlineModalBody').innerHTML = weekHtml;
+        openModal('onlineModal');
+    }
+
+    // ============ 参会状态弹窗 ============
+    function showMeetingDetail(userId) {
+        var u = users.find(function(x) { return x.id === userId; });
+        if (!u) return;
+        var html = '<div class="flex items-center gap-3 mb-4">' +
+            renderAvatar(u.name) +
+            '<div>' +
+                '<div class="text-sm font-medium text-gray-800">' + u.name + '</div>' +
+                '<div class="text-xs text-gray-400">' + u.company + '</div>' +
+            '</div>' +
+        '</div>';
+
+        if (u.inMeeting) {
+            html += '<div class="mb-4">' +
+                '<div class="text-xs text-gray-400 mb-2 font-medium">当前参与的会议</div>' +
+                '<div class="px-4 py-3 bg-blue-50 rounded-xl flex items-center gap-3">' +
+                    '<div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center"><i class="ri-video-chat-line text-blue-500"></i></div>' +
+                    '<div class="flex-1">' +
+                        '<div class="text-sm font-medium text-gray-800">' + u.currentMeeting + '</div>' +
+                        '<div class="text-xs text-blue-500 mt-0.5"><span class="online-dot green"></span>进行中</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        } else {
+            html += '<div class="mb-4">' +
+                '<div class="text-xs text-gray-400 mb-2 font-medium">当前参会状态</div>' +
+                '<div class="px-4 py-3 bg-gray-50 rounded-xl flex items-center gap-3">' +
+                    '<div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center"><i class="ri-video-chat-line text-gray-400"></i></div>' +
+                    '<span class="text-sm text-gray-500">当前无参会</span>' +
+                '</div>' +
+            '</div>';
+        }
+
+        html += '<div>' +
+            '<div class="text-xs text-gray-400 mb-2 font-medium">历史参会统计</div>' +
+            '<div class="px-4 py-3 bg-gray-50 rounded-xl flex items-center gap-3">' +
+                '<div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center"><i class="ri-bar-chart-line text-purple-500"></i></div>' +
+                '<div>' +
+                    '<span class="text-xl font-semibold text-gray-800">' + u.totalMeetings + '</span>' +
+                    '<span class="text-sm text-gray-500 ml-2">累计参会场次</span>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+        document.getElementById('meetingModalBody').innerHTML = html;
+        openModal('meetingModal');
+    }
+
+    // ============ 预约详情弹窗 ============
+    function showAppointmentDetail(userId) {
+        var u = users.find(function(x) { return x.id === userId; });
+        if (!u) return;
+        var html = '<div class="flex items-center gap-3 mb-4">' +
+            renderAvatar(u.name) +
+            '<div>' +
+                '<div class="text-sm font-medium text-gray-800">' + u.name + '</div>' +
+                '<div class="text-xs text-gray-400">' + u.company + '</div>' +
+            '</div>' +
+        '</div>' +
+        '<div class="text-xs text-gray-400 mb-2 font-medium">预约会议（共 ' + u.appointments.length + ' 场）</div>';
+
+        if (u.appointments.length === 0) {
+            html += '<div class="px-4 py-8 text-center text-sm text-gray-400">' +
+                '<i class="ri-calendar-line text-3xl block mb-2 text-gray-300"></i>暂无预约' +
+            '</div>';
+        } else {
+            html += '<div class="space-y-2">';
+            u.appointments.forEach(function(a) {
+                var statusTag = a.status === 'confirmed' ?
+                    '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-600">已确认</span>' :
+                    '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-600">待确认</span>';
+                html += '<div class="px-4 py-3 bg-gray-50 rounded-xl flex items-center gap-3">' +
+                    '<div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0"><i class="ri-calendar-event-line text-orange-500"></i></div>' +
+                    '<div class="flex-1 min-w-0">' +
+                        '<div class="text-sm font-medium text-gray-800 truncate">' + a.title + '</div>' +
+                        '<div class="text-xs text-gray-400 mt-0.5">' + a.date + '</div>' +
+                    '</div>' +
+                    statusTag +
+                '</div>';
+            });
+            html += '</div>';
+        }
+
+        document.getElementById('appointmentModalBody').innerHTML = html;
+        openModal('appointmentModal');
+    }
+
+    // ============ 监控需求弹窗 ============
+    function showDemandDetail(userId) {
+        var u = users.find(function(x) { return x.id === userId; });
+        if (!u) return;
+        var html = '<div class="flex items-center gap-3 mb-4">' +
+            renderAvatar(u.name) +
+            '<div>' +
+                '<div class="text-sm font-medium text-gray-800">' + u.name + '</div>' +
+                '<div class="text-xs text-gray-400">' + u.company + '</div>' +
+            '</div>' +
+        '</div>' +
+        '<div class="text-xs text-gray-400 mb-2 font-medium">监控需求（共 ' + u.demands.length + ' 条）</div>';
+
+        if (u.demands.length === 0) {
+            html += '<div class="px-4 py-8 text-center text-sm text-gray-400">' +
+                '<i class="ri-radar-line text-3xl block mb-2 text-gray-300"></i>暂无需求' +
+            '</div>';
+        } else {
+            html += '<div class="space-y-2">';
+            u.demands.forEach(function(d) {
+                var statusMap = { pending: { label: '待处理', cls: 'bg-orange-50 text-orange-600' }, processing: { label: '处理中', cls: 'bg-blue-50 text-blue-600' }, done: { label: '已处理', cls: 'bg-green-50 text-green-600' } };
+                var s = statusMap[d.status] || statusMap.pending;
+                html += '<div class="px-4 py-3 bg-gray-50 rounded-xl">' +
+                    '<div class="flex items-center justify-between mb-1">' +
+                        '<span class="text-sm font-medium text-gray-800">' + d.title + '</span>' +
+                        '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ' + s.cls + '">' + s.label + '</span>' +
+                    '</div>' +
+                '</div>';
+            });
+            html += '</div>';
+        }
+
+        document.getElementById('demandModalBody').innerHTML = html;
+        openModal('demandModal');
+    }
+
+    // ============ 弹窗外部关闭 ============
+    ['userDetailModal', 'onlineModal', 'meetingModal', 'appointmentModal', 'demandModal'].forEach(function(id) {
+        document.getElementById(id).addEventListener('click', function(e) {
+            if (e.target === this) closeModal(id);
+        });
+    });
+
+    // ============ 初始渲染 ============
+    render();
+    </script>
+</body>
+</html>

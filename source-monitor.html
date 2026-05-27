@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北极星管理平台 - 信源监控需求管理</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .filter-btn.active {
+            background: white;
+            color: #1f2937;
+            font-weight: 500;
+        }
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(2px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div id="app"></div>
+
+    <!-- 处理弹窗 -->
+    <div id="processModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-2xl shadow-xl w-[560px] max-w-[90vw] max-h-[85vh] overflow-hidden flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+                <h3 class="text-base font-semibold text-gray-800">需求处理</h3>
+                <button onclick="closeProcessModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                    <i class="ri-close-line text-gray-400 text-lg"></i>
+                </button>
+            </div>
+            <div class="px-6 py-5 overflow-y-auto flex-1" id="processModalBody"></div>
+            <div class="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0">
+                <button onclick="closeProcessModal()" class="px-4 py-2 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">取消</button>
+                <button onclick="submitProcess()" class="px-4 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors cursor-pointer">确认提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-2xl shadow-xl w-[400px] max-w-[90vw]">
+            <div class="px-6 py-5 text-center">
+                <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+                    <i class="ri-error-warning-line text-red-500 text-2xl"></i>
+                </div>
+                <h3 class="text-base font-semibold text-gray-800 mb-2">确认删除需求</h3>
+                <p id="deleteDemandTitle" class="text-sm text-gray-500"></p>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-100 flex justify-center gap-3">
+                <button onclick="closeDeleteModal()" class="px-6 py-2 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">取消</button>
+                <button onclick="confirmDelete()" class="px-6 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors cursor-pointer">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ============ 需求数据 ============
+    const demands = [
+        { id: 'd1', title: '新增万得宏观经济数据库接入', source: '王建华', sourceCompany: '华夏基金', sourcePosition: '基金经理', sourcePhone: '138****8801', sourceEmail: 'wjh@example.com', sourceLink: 'https://www.wind.com.cn', status: 'pending', createdAt: '2026-05-26 09:15', detail: '希望平台能够接入万得宏观经济数据库，实时获取GDP、CPI、PMI等核心宏观数据，用于投研分析参考。该数据源覆盖面广、更新及时，是市场上主流的宏观研究数据来源。', remark: '' },
+        { id: 'd2', title: '对接同花顺iFind研报推送', source: '李梦琪', sourceCompany: '南方基金', sourcePosition: '研究员', sourcePhone: '139****2234', sourceEmail: 'lmq@example.com', sourceLink: 'https://www.10jqka.com.cn/ifind', status: 'pending', createdAt: '2026-05-26 10:30', detail: '需要将同花顺iFind的研报推送功能整合到平台中，包括每日研报摘要推送、自定义关键词订阅、研报评分等功能。优先覆盖消费板块相关研报。', remark: '' },
+        { id: 'd3', title: '增加东方财富资金流向监控', source: '张伟', sourceCompany: '招商证券', sourcePosition: '分析师', sourcePhone: '135****5567', sourceEmail: 'zw@example.com', sourceLink: 'https://data.eastmoney.com', status: 'processing', createdAt: '2026-05-25 14:20', detail: '需要增加东方财富网的个股资金流向数据监控，包括北向资金流入流出、主力资金净流入、行业板块资金轮动等维度的实时数据展示和告警功能。', remark: '已联系东方财富数据接口对接中，预计本周完成技术对接' },
+        { id: 'd4', title: '接入彭博终端债券行情数据', source: '陈晓燕', sourceCompany: '易方达基金', sourcePosition: '投资总监', sourcePhone: '136****7890', sourceEmail: 'cxy@example.com', sourceLink: 'https://www.bloomberg.com', status: 'pending', createdAt: '2026-05-25 11:00', detail: '作为固收团队核心需求，希望接入彭博终端的债券行情数据（国债收益率曲线、信用利差、可转债行情等），用于固定收益投研分析。需要实时更新，延迟不超过5分钟。', remark: '' },
+        { id: 'd5', title: '增加上海证券报新闻舆情监控', source: '刘强', sourceCompany: '广发证券', sourcePosition: '策略分析师', sourcePhone: '137****3312', sourceEmail: 'lq@example.com', sourceLink: 'https://www.cnstock.com', status: 'processing', createdAt: '2026-05-24 16:45', detail: '需要增加新闻舆情监控模块，覆盖上海证券报、证券时报、中国证券报等主流财经媒体，支持按关键词、行业、个股进行舆情追踪，并能自动生成舆情日报。', remark: '已完成上海证券报数据接入，证券时报对接中' },
+        { id: 'd6', title: '接入中证指数行业分类数据', source: '赵明', sourceCompany: '中信证券', sourcePosition: '科技行业分析师', sourcePhone: '180****4456', sourceEmail: 'zm@example.com', sourceLink: 'https://www.csindex.com.cn', status: 'done', createdAt: '2026-05-23 09:30', detail: '需要接入中证指数有限公司的行业分类数据，用于统一平台的行业分类标准。包括中证一级行业、二级行业分类体系，以及各行业成分股列表的定期同步更新。', remark: '已完成中证行业分类数据接入，每日自动同步更新' },
+        { id: 'd7', title: '增加港交所实时行情数据', source: '孙丽华', sourceCompany: '国泰基金', sourcePosition: '基金经理', sourcePhone: '181****7723', sourceEmail: 'slh@example.com', sourceLink: 'https://www.hkex.com.hk', status: 'pending', createdAt: '2026-05-24 10:10', detail: '港股研究需要接入港交所实时行情数据，包括港股大盘指数、个股实时报价、成交量和成交额等。需要支持港股通标的的行情展示和异动提醒。', remark: '' },
+        { id: 'd8', title: '新增天相投研评级数据整合', source: '周建国', sourceCompany: '平安资管', sourcePosition: '量化研究员', sourcePhone: '182****8834', sourceEmail: 'zjg@example.com', sourceLink: 'https://www.txsec.com', status: 'done', createdAt: '2026-05-22 14:00', detail: '需要整合天相投顾的基金评级和券商研报评级数据，建立统一的多维度评级体系。用于量化策略中分析师预期变化的因子挖掘。', remark: '已完成天相评级数据整合，数据质量验证通过' },
+        { id: 'd9', title: '对接IRS利率互换行情数据', source: '吴晓峰', sourceCompany: '博时基金', sourcePosition: '研究总监', sourcePhone: '183****2245', sourceEmail: 'wxf@example.com', sourceLink: 'https://www.chinamoney.com.cn', status: 'done', createdAt: '2026-05-21 11:20', detail: '固收团队需要对接银行间市场IRS利率互换行情数据，包括FR007 IRS、Shibor IRS等关键利率互换品种的实时报价和历史数据，用于利率衍生品研究。', remark: '已完成CFETS接口对接，IRS数据实时更新正常' },
+        { id: 'd10', title: '增加私募基金持仓数据追踪', source: '郑雅婷', sourceCompany: '汇添富基金', sourcePosition: '基金经理', sourcePhone: '184****5567', sourceEmail: 'zyt@example.com', sourceLink: 'https://www.51fund.cn', status: 'processing', createdAt: '2026-05-23 15:30', detail: '希望能够追踪知名私募基金的持仓变化情况，包括季报披露后的持仓汇总、调仓方向分析、重仓股变动提醒等功能。需要覆盖百亿以上规模的主要私募管理人。', remark: '私募数据来源确认中，优先接入华润信托阳光私募数据' },
+        { id: 'd11', title: '接入碳排放权交易市场数据', source: '黄志远', sourceCompany: '工银瑞信', sourcePosition: '固收基金经理', sourcePhone: '185****6678', sourceEmail: 'hzr@example.com', sourceLink: 'https://www.cneeex.com', status: 'pending', createdAt: '2026-05-26 08:00', detail: 'ESG投研需要接入全国碳排放权交易市场的数据，包括碳排放配额价格、成交量、各行业配额分配情况等。同时希望覆盖欧盟碳市场（EU ETS）价格作为参考。', remark: '' },
+        { id: 'd12', title: '新增产业链图谱可视化功能', source: '林思远', sourceCompany: '建信基金', sourcePosition: '债券研究员', sourcePhone: '186****7789', sourceEmail: 'lsr@example.com', sourceLink: 'https://www.ccb.com/fund', status: 'done', createdAt: '2026-05-20 09:00', detail: '需要新增产业链图谱可视化功能，支持上下游关系展示、关键节点企业标注、产业链景气度热力图等功能。重点覆盖新能源、半导体、医药三大产业链。', remark: '三大产业链图谱已完成开发并上线，用户反馈良好' },
+    ];
+
+    let currentFilter = 'all';
+    let searchKeyword = '';
+    let processingDemandId = null;
+    let deletingDemandId = null;
+
+    // ============ 统计 ============
+    function getStats() {
+        const total = demands.length;
+        const pending = demands.filter(d => d.status === 'pending').length;
+        const processing = demands.filter(d => d.status === 'processing').length;
+        const done = demands.filter(d => d.status === 'done').length;
+        return { total, pending, processing, done };
+    }
+
+    // ============ 过滤 & 搜索 ============
+    function getFilteredDemands() {
+        return demands.filter(d => {
+            const matchFilter = currentFilter === 'all' || d.status === currentFilter;
+            const matchSearch = searchKeyword === '' ||
+                d.title.includes(searchKeyword) ||
+                d.source.includes(searchKeyword) ||
+                d.sourceCompany.includes(searchKeyword);
+            return matchFilter && matchSearch;
+        });
+    }
+
+    // ============ 状态标签 ============
+    function renderStatusTag(status) {
+        const map = {
+            pending: { label: '待处理', cls: 'bg-orange-50 text-orange-600' },
+            processing: { label: '处理中', cls: 'bg-blue-50 text-blue-600' },
+            done: { label: '已处理', cls: 'bg-green-50 text-green-600' },
+        };
+        const s = map[status] || map.pending;
+        return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${s.cls}">${s.label}</span>`;
+    }
+
+    // ============ 头像 ============
+    function renderAvatar(name) {
+        const colors = ['bg-red-100 text-red-600', 'bg-blue-100 text-blue-600', 'bg-green-100 text-green-600', 'bg-purple-100 text-purple-600', 'bg-amber-100 text-amber-600', 'bg-pink-100 text-pink-600'];
+        const idx = name.charCodeAt(0) % colors.length;
+        const cls = colors[idx];
+        const initial = name.charAt(name.length - 2) + name.charAt(name.length - 1);
+        return `<div class="w-9 h-9 rounded-full ${cls} flex items-center justify-center flex-shrink-0 text-xs font-medium">${initial}</div>`;
+    }
+
+    // ============ 侧边栏 ============
+    const navLinkMap = { '/experts': 'experts-clone.html', '/conferences': 'conferences.html', '/attendees': 'attendees.html', '/minutes': 'minutes.html', '/collections': 'collections.html', '/topics': 'topics.html', '/stocks': 'stocks.html', '/research': 'research.html', '/users': 'user-management.html', '/source-monitor': 'source-monitor.html', '/user-profile': 'user-profile.html' };
+    function renderNavItem(path, icon, label, isSub, isActive) {
+        const href = navLinkMap[path] || path.replace('/', '') + '.html';
+        if (isSub) {
+            return `<a class="flex items-center h-10 mx-2 mb-0.5 rounded-lg text-sm transition-colors cursor-pointer whitespace-nowrap pl-8 pr-4 ${isActive ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}" href="${href}">
+                <div class="w-3 h-3 flex items-center justify-center mr-1 flex-shrink-0"><i class="ri-corner-down-right-line text-xs text-gray-300"></i></div>
+                <div class="w-5 h-5 flex items-center justify-center flex-shrink-0"><i class="${icon} text-base"></i></div>
+                <span class="ml-2">${label}</span>
+            </a>`;
+        }
+        return `<a class="flex items-center h-10 mx-2 mb-0.5 rounded-lg text-sm transition-colors cursor-pointer whitespace-nowrap px-4 ${isActive ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}" href="${href}">
+            <div class="w-5 h-5 flex items-center justify-center flex-shrink-0"><i class="${icon} text-base"></i></div>
+            <span class="ml-2">${label}</span>
+        </a>`;
+    }
+
+    // ============ 主渲染 ============
+    function render() {
+        const stats = getStats();
+        const filtered = getFilteredDemands();
+        const app = document.getElementById('app');
+
+        app.innerHTML = `
+        <div class="flex h-screen bg-gray-50 font-sans overflow-hidden">
+            <!-- 侧边栏 -->
+            <aside class="flex flex-col bg-white border-r border-gray-100 transition-all duration-300 w-56 flex-shrink-0">
+                <div class="flex items-center h-16 px-4 border-b border-gray-100 cursor-pointer select-none">
+                    <img alt="财跃星辰" class="w-8 h-8 object-contain flex-shrink-0" src="https://static.readdy.ai/image/3dd3b08e3f41e718a9a692da40c4373e/36a1cddcc28d86e13fb969a9b2232329.png">
+                    <span class="ml-2 text-sm font-semibold text-gray-800 whitespace-nowrap">北极星管理平台</span>
+                </div>
+                <nav class="flex-1 py-4 overflow-y-auto">
+                    ${renderNavItem('/experts', 'ri-user-star-line', '专家管理', false, false)}
+                    ${renderNavItem('/conferences', 'ri-video-chat-line', '专家会议管理', false, false)}
+                    ${renderNavItem('/attendees', 'ri-team-line', '会议人员管理', true, false)}
+                    ${renderNavItem('/minutes', 'ri-file-text-line', '专家纪要库', false, false)}
+                    ${renderNavItem('/collections', 'ri-bookmark-3-line', '精选纪要集', true, false)}
+                    ${renderNavItem('/topics', 'ri-pie-chart-line', '话题与板块&产业链', true, false)}
+                    ${renderNavItem('/stocks', 'ri-stock-line', '话题与股票清单', true, false)}
+                    ${renderNavItem('/research', 'ri-survey-line', '调研活动管理', false, false)}
+                    ${renderNavItem('/users', 'ri-group-line', '用户审核管理', false, false)}
+                    ${renderNavItem('/user-profile', 'ri-user-heart-line', '用户画像管理', false, false)}
+                    ${renderNavItem('/source-monitor', 'ri-radar-line', '信源监控需求管理', false, true)}
+                </nav>
+                <div class="border-t border-gray-100 p-3">
+                    <button class="w-full flex items-center justify-center h-9 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors cursor-pointer">
+                        <div class="w-5 h-5 flex items-center justify-center"><i class="ri-arrow-left-s-line text-lg"></i></div>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- 主区域 -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <header class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 flex-shrink-0">
+                    <h1 class="text-base font-semibold text-gray-800">信源监控需求管理</h1>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 flex items-center justify-center"><i class="ri-notification-3-line text-gray-400 text-lg"></i></div>
+                        <div class="flex items-center gap-2 cursor-pointer">
+                            <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                                <span class="text-xs font-medium text-red-600">管</span>
+                            </div>
+                            <span class="text-sm text-gray-600">管理员</span>
+                            <div class="w-4 h-4 flex items-center justify-center"><i class="ri-arrow-down-s-line text-gray-400"></i></div>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="flex-1 overflow-y-auto p-6">
+                    <!-- 看板 -->
+                    <div class="grid grid-cols-4 gap-4 mb-6">
+                        <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                            <div class="w-11 h-11 rounded-lg flex items-center justify-center text-red-500 bg-red-50">
+                                <i class="ri-file-list-3-line text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-semibold text-gray-800">${stats.total}</div>
+                                <div class="text-xs text-gray-400 mt-0.5">需求总数</div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                            <div class="w-11 h-11 rounded-lg flex items-center justify-center text-orange-500 bg-orange-50">
+                                <i class="ri-time-line text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-semibold text-gray-800">${stats.pending}</div>
+                                <div class="text-xs text-gray-400 mt-0.5">待处理</div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                            <div class="w-11 h-11 rounded-lg flex items-center justify-center text-blue-500 bg-blue-50">
+                                <i class="ri-loader-4-line text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-semibold text-gray-800">${stats.processing}</div>
+                                <div class="text-xs text-gray-400 mt-0.5">处理中</div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 flex items-center gap-4">
+                            <div class="w-11 h-11 rounded-lg flex items-center justify-center text-green-500 bg-green-50">
+                                <i class="ri-checkbox-circle-line text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-semibold text-gray-800">${stats.done}</div>
+                                <div class="text-xs text-gray-400 mt-0.5">已处理</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 表格区域 -->
+                    <div class="bg-white rounded-xl">
+                        <!-- 搜索 & 筛选栏 -->
+                        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+                            <div class="flex items-center gap-3">
+                                <div class="relative">
+                                    <div class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-gray-400">
+                                        <i class="ri-search-line text-sm"></i>
+                                    </div>
+                                    <input id="searchInput" placeholder="搜索需求概况、需求方..." class="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg w-64 focus:outline-none focus:border-red-400" value="${searchKeyword}">
+                                </div>
+                                <div class="flex items-center gap-1 bg-gray-50 rounded-lg p-1">
+                                    <button class="filter-btn px-3 py-1 rounded-md text-sm transition-colors cursor-pointer whitespace-nowrap text-gray-500 hover:text-gray-700 ${currentFilter === 'all' ? 'active' : ''}" onclick="setFilter('all')">全部</button>
+                                    <button class="filter-btn px-3 py-1 rounded-md text-sm transition-colors cursor-pointer whitespace-nowrap text-gray-500 hover:text-gray-700 ${currentFilter === 'pending' ? 'active' : ''}" onclick="setFilter('pending')">待处理</button>
+                                    <button class="filter-btn px-3 py-1 rounded-md text-sm transition-colors cursor-pointer whitespace-nowrap text-gray-500 hover:text-gray-700 ${currentFilter === 'processing' ? 'active' : ''}" onclick="setFilter('processing')">处理中</button>
+                                    <button class="filter-btn px-3 py-1 rounded-md text-sm transition-colors cursor-pointer whitespace-nowrap text-gray-500 hover:text-gray-700 ${currentFilter === 'done' ? 'active' : ''}" onclick="setFilter('done')">已处理</button>
+                                </div>
+                            </div>
+                            <button class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors cursor-pointer whitespace-nowrap">
+                                <div class="w-4 h-4 flex items-center justify-center"><i class="ri-add-line"></i></div>
+                                新增需求
+                            </button>
+                        </div>
+
+                        <!-- 表格 -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="text-xs text-gray-400 border-b border-gray-50">
+                                        <th class="text-left px-5 py-3 font-medium min-w-[260px]">需求概况</th>
+                                        <th class="text-left px-5 py-3 font-medium min-w-[160px]">需求来源</th>
+                                        <th class="text-left px-5 py-3 font-medium min-w-[100px]">需求状态</th>
+                                        <th class="text-left px-5 py-3 font-medium min-w-[120px]">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${filtered.length === 0 ? `
+                                        <tr><td colspan="4" class="px-5 py-16 text-center text-sm text-gray-400">
+                                            <i class="ri-inbox-line text-4xl block mb-2 text-gray-300"></i>暂无数据
+                                        </td></tr>
+                                    ` : filtered.map(d => `
+                                        <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                            <td class="px-5 py-4">
+                                                <div>
+                                                    <div class="text-sm font-medium text-gray-800 mb-1 leading-snug">${d.title}</div>
+                                                    <div class="text-xs text-gray-400">${d.createdAt}</div>
+                                                </div>
+                                            </td>
+                                            <td class="px-5 py-4">
+                                                <div class="flex items-center gap-3">
+                                                    ${renderAvatar(d.source)}
+                                                    <div>
+                                                        <div class="text-sm font-medium text-gray-800">${d.source}</div>
+                                                        <div class="text-xs text-gray-400 mt-0.5">${d.sourcePosition} · ${d.sourceCompany}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-5 py-4">${renderStatusTag(d.status)}</td>
+                                            <td class="px-5 py-4">
+                                                <button onclick="openProcessModal('${d.id}')" class="text-xs text-gray-500 hover:text-red-600 cursor-pointer whitespace-nowrap px-2 py-1 rounded hover:bg-red-50 transition-colors">处理</button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 分页信息 -->
+                        <div class="px-5 py-3 text-xs text-gray-400 border-t border-gray-50 flex items-center justify-between">
+                            <span>共 ${filtered.length} 条记录</span>
+                            <div class="flex items-center gap-1">
+                                <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 cursor-pointer"><i class="ri-arrow-left-s-line"></i></button>
+                                <button class="w-8 h-8 flex items-center justify-center rounded bg-red-500 text-white text-xs font-medium cursor-pointer">1</button>
+                                <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 text-xs text-gray-500 cursor-pointer">2</button>
+                                <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 cursor-pointer"><i class="ri-arrow-right-s-line"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>`;
+
+        // 绑定搜索
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                searchKeyword = e.target.value;
+                render();
+            });
+            if (searchKeyword) {
+                searchInput.focus();
+                searchInput.setSelectionRange(searchKeyword.length, searchKeyword.length);
+            }
+        }
+    }
+
+    // ============ 筛选 ============
+    function setFilter(filter) {
+        currentFilter = filter;
+        render();
+    }
+
+    // ============ 处理弹窗 ============
+    function openProcessModal(demandId) {
+        processingDemandId = demandId;
+        const d = demands.find(x => x.id === demandId);
+        if (!d) return;
+
+        const body = document.getElementById('processModalBody');
+        body.innerHTML = `
+            <!-- 需求详情 -->
+            <div class="mb-5">
+                <div class="text-xs text-gray-400 mb-2 font-medium">需求详情</div>
+                <div class="p-4 bg-gray-50 rounded-xl">
+                    <div class="text-sm font-medium text-gray-800 mb-2">${d.title}</div>
+                    <div class="text-sm text-gray-600 leading-relaxed">${d.detail}</div>
+                    <div class="mt-2 text-xs text-gray-400">提交时间：${d.createdAt}</div>
+                </div>
+            </div>
+
+            <!-- 信源链接 -->
+            <div class="mb-5">
+                <div class="text-xs text-gray-400 mb-2 font-medium">信源链接</div>
+                <div class="flex items-center gap-2 px-4 py-2.5 bg-gray-50 rounded-xl">
+                    <i class="ri-link text-gray-400 text-sm flex-shrink-0"></i>
+                    <a href="${d.sourceLink || '#'}" target="_blank" rel="noopener" class="text-sm text-blue-500 hover:text-blue-700 hover:underline truncate flex-1 transition-colors">${d.sourceLink || '暂无链接'}</a>
+                    <button onclick="navigator.clipboard.writeText('${d.sourceLink || ''}')" class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-200 transition-colors flex-shrink-0 cursor-pointer" title="复制链接">
+                        <i class="ri-file-copy-line text-gray-400 text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 需求方联系信息 -->
+            <div class="mb-5">
+                <div class="text-xs text-gray-400 mb-2 font-medium">需求方联系信息</div>
+                <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                    ${renderAvatar(d.source)}
+                    <div class="flex-1">
+                        <div class="text-sm font-medium text-gray-800">${d.source}</div>
+                        <div class="text-xs text-gray-400">${d.sourcePosition} · ${d.sourceCompany}</div>
+                    </div>
+                </div>
+                <div class="mt-2 grid grid-cols-2 gap-2">
+                    <div class="flex items-center gap-2 px-4 py-2.5 bg-gray-50 rounded-lg">
+                        <i class="ri-phone-line text-gray-400 text-sm"></i>
+                        <span class="text-sm text-gray-600">${d.sourcePhone}</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-4 py-2.5 bg-gray-50 rounded-lg">
+                        <i class="ri-mail-line text-gray-400 text-sm"></i>
+                        <span class="text-sm text-gray-600">${d.sourceEmail}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 处理状态 -->
+            <div class="mb-4">
+                <div class="text-xs text-gray-400 mb-2 font-medium">处理状态</div>
+                <div class="flex gap-3">
+                    <label class="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-orange-400 transition-colors has-[:checked]:border-orange-500 has-[:checked]:bg-orange-50">
+                        <input type="radio" name="processStatus" value="pending" class="accent-orange-500" ${d.status === 'pending' ? 'checked' : ''}>
+                        <span class="text-sm text-gray-700">待处理</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-400 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                        <input type="radio" name="processStatus" value="processing" class="accent-blue-500" ${d.status === 'processing' ? 'checked' : ''}>
+                        <span class="text-sm text-gray-700">处理中</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-400 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
+                        <input type="radio" name="processStatus" value="done" class="accent-green-500" ${d.status === 'done' ? 'checked' : ''}>
+                        <span class="text-sm text-gray-700">已处理</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 处理备注 -->
+            <div class="mb-2">
+                <div class="text-xs text-gray-400 mb-2 font-medium">处理备注 <span class="font-normal">(选填)</span></div>
+                <textarea id="processRemark" rows="3" class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:border-red-400" placeholder="请输入处理备注...">${d.remark || ''}</textarea>
+            </div>
+        `;
+
+        const modal = document.getElementById('processModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeProcessModal() {
+        const modal = document.getElementById('processModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        processingDemandId = null;
+    }
+
+    function submitProcess() {
+        const result = document.querySelector('input[name="processStatus"]:checked');
+        if (!result) {
+            const radios = document.querySelector('input[name="processStatus"]');
+            radios.closest('div').classList.add('ring-2', 'ring-red-300', 'rounded-lg');
+            setTimeout(() => radios.closest('div').classList.remove('ring-2', 'ring-red-300', 'rounded-lg'), 1500);
+            return;
+        }
+
+        const demand = demands.find(d => d.id === processingDemandId);
+        if (demand) {
+            demand.status = result.value;
+            demand.remark = document.getElementById('processRemark').value || '';
+        }
+
+        closeProcessModal();
+        render();
+    }
+
+    // ============ 删除弹窗 ============
+    function openDeleteModal(demandId) {
+        deletingDemandId = demandId;
+        const d = demands.find(x => x.id === demandId);
+        if (!d) return;
+
+        document.getElementById('deleteDemandTitle').textContent = `确定要删除需求「${d.title}」吗？此操作不可恢复。`;
+
+        const modal = document.getElementById('deleteModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeDeleteModal() {
+        const modal = document.getElementById('deleteModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        deletingDemandId = null;
+    }
+
+    function confirmDelete() {
+        const idx = demands.findIndex(d => d.id === deletingDemandId);
+        if (idx > -1) {
+            demands.splice(idx, 1);
+        }
+        closeDeleteModal();
+        render();
+    }
+
+    // ============ 弹窗外部关闭 ============
+    document.getElementById('processModal').addEventListener('click', function(e) {
+        if (e.target === this) closeProcessModal();
+    });
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+    });
+
+    // ============ 初始渲染 ============
+    render();
+    </script>
+</body>
+</html>
