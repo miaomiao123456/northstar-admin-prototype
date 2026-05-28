@@ -10,7 +10,7 @@
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center">
-    <div id="login-page" class="w-full max-w-sm mx-auto px-6">
+    <div class="w-full max-w-sm mx-auto px-6">
         <div class="bg-white rounded-2xl shadow-lg p-8">
             <div class="text-center mb-8">
                 <div class="w-14 h-14 bg-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -32,65 +32,7 @@
         </div>
     </div>
 
-    <div id="nav-page" class="w-full max-w-4xl mx-auto px-6 py-12 hidden">
-        <div class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-900">北极星管理平台</h1>
-            <p class="text-gray-500 mt-1">投研平台中后台界面原型</p>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <a href="conferences.html" class="block bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <div class="font-medium text-gray-900">专家会议管理</div>
-                <div class="text-sm text-gray-500 mt-1">会议创建、编辑与管理</div>
-            </a>
-            <a href="experts-clone.html" class="block bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <div class="font-medium text-gray-900">专家管理</div>
-                <div class="text-sm text-gray-500 mt-1">专家信息与级别管理</div>
-            </a>
-            <a href="user-management.html" class="block bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <div class="font-medium text-gray-900">用户管理</div>
-                <div class="text-sm text-gray-500 mt-1">用户注册审核与信息管理</div>
-            </a>
-            <a href="user-profile.html" class="block bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <div class="font-medium text-gray-900">用户画像</div>
-                <div class="text-sm text-gray-500 mt-1">用户详情与行为分析</div>
-            </a>
-            <a href="attendees.html" class="block bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <div class="font-medium text-gray-900">参会人管理</div>
-                <div class="text-sm text-gray-500 mt-1">参会人员信息管理</div>
-            </a>
-            <a href="minutes.html" class="block bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <div class="font-medium text-gray-900">会议纪要</div>
-                <div class="text-sm text-gray-500 mt-1">纪要生成与编辑</div>
-            </a>
-            <a href="research.html" class="block bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <div class="font-medium text-gray-900">研究报告</div>
-                <div class="text-sm text-gray-500 mt-1">研报管理与分发</div>
-            </a>
-            <a href="source-monitor.html" class="block bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <div class="font-medium text-gray-900">信源监控</div>
-                <div class="text-sm text-gray-500 mt-1">信息源追踪与监控</div>
-            </a>
-            <a href="stocks.html" class="block bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <div class="font-medium text-gray-900">股票管理</div>
-                <div class="text-sm text-gray-500 mt-1">股票列表与分类</div>
-            </a>
-            <a href="topics.html" class="block bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <div class="font-medium text-gray-900">话题管理</div>
-                <div class="text-sm text-gray-500 mt-1">话题创建与管理</div>
-            </a>
-            <a href="collections.html" class="block bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <div class="font-medium text-gray-900">合集管理</div>
-                <div class="text-sm text-gray-500 mt-1">内容合集管理</div>
-            </a>
-        </div>
-        <div class="mt-6 text-right">
-            <button onclick="logout()" class="text-sm text-gray-400 hover:text-gray-600">退出登录</button>
-        </div>
-    </div>
-
     <script>
-        const PASS_HASH = '8a5e3c0f7b2d1e4a6f9c3b8d5e2a7f1c4b6d9e3a5f8c2b7d4e1a6f9c3b8d5e2a';
-
         async function hashPassword(password) {
             const encoder = new TextEncoder();
             const data = encoder.encode(password + '_northstar_salt');
@@ -99,15 +41,9 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        async function getCorrectHash() {
-            return await hashPassword('touyan2026');
-        }
-
         function checkAuth() {
-            const auth = sessionStorage.getItem('northstar_auth');
-            if (auth === 'authenticated') {
-                document.getElementById('login-page').classList.add('hidden');
-                document.getElementById('nav-page').classList.remove('hidden');
+            if (sessionStorage.getItem('northstar_auth') === 'authenticated') {
+                window.location.href = 'conferences.html';
             }
         }
 
@@ -115,23 +51,16 @@
             e.preventDefault();
             const input = document.getElementById('password-input').value;
             const inputHash = await hashPassword(input);
-            const correctHash = await getCorrectHash();
+            const correctHash = await hashPassword('touyan2026');
 
             if (inputHash === correctHash) {
                 sessionStorage.setItem('northstar_auth', 'authenticated');
-                document.getElementById('login-page').classList.add('hidden');
-                document.getElementById('nav-page').classList.remove('hidden');
+                window.location.href = 'conferences.html';
             } else {
                 document.getElementById('error-msg').classList.remove('hidden');
                 document.getElementById('password-input').value = '';
             }
         });
-
-        function logout() {
-            sessionStorage.removeItem('northstar_auth');
-            document.getElementById('nav-page').classList.add('hidden');
-            document.getElementById('login-page').classList.remove('hidden');
-        }
 
         checkAuth();
     </script>
