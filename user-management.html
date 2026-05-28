@@ -91,6 +91,21 @@
                         <input type="text" id="addUserCompany" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50" placeholder="请输入所属机构">
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">用户类型 <span class="text-red-500">*</span></label>
+                        <div class="flex gap-3">
+                            <label class="flex-1 flex items-center justify-center h-10 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-red-300 transition-colors" id="userTypeBuyerLabel" onclick="selectUserType('买方')">
+                                <input type="radio" name="userType" value="买方" class="hidden">
+                                <i class="ri-funds-box-line text-lg mr-2 text-gray-400"></i>
+                                <span class="text-sm text-gray-600">买方</span>
+                            </label>
+                            <label class="flex-1 flex items-center justify-center h-10 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-red-300 transition-colors" id="userTypeSellerLabel" onclick="selectUserType('卖方')">
+                                <input type="radio" name="userType" value="卖方" class="hidden">
+                                <i class="ri-line-chart-line text-lg mr-2 text-gray-400"></i>
+                                <span class="text-sm text-gray-600">卖方</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">职位</label>
                         <input type="text" id="addUserPosition" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50" placeholder="请输入职位">
                     </div>
@@ -137,18 +152,18 @@
     const cardSeeds = ['finance1','fund2','securities3','invest4','research5','equity6','bond7','quant8','trade9','capital10','asset11','bank12'];
 
     const users = [
-        { id: 'u1', name: '王建华', phone: '138****8801', email: 'wjh@example.com', company: '华夏基金', position: '基金经理', reviewStatus: 'approved', cardSeed: 'finance1' },
-        { id: 'u2', name: '李梦琪', phone: '139****2234', email: 'lmq@example.com', company: '南方基金', position: '研究员', reviewStatus: 'approved', cardSeed: 'fund2' },
-        { id: 'u3', name: '张伟', phone: '135****5567', email: 'zw@example.com', company: '招商证券', position: '分析师', reviewStatus: 'approved', cardSeed: 'securities3' },
-        { id: 'u4', name: '陈晓燕', phone: '136****7890', email: 'cxy@example.com', company: '易方达基金', position: '投资总监', reviewStatus: 'pending', cardSeed: 'invest4' },
-        { id: 'u5', name: '刘强', phone: '137****3312', email: 'lq@example.com', company: '广发证券', position: '策略分析师', reviewStatus: 'approved', cardSeed: 'research5' },
-        { id: 'u6', name: '赵明', phone: '180****4456', email: 'zm@example.com', company: '中信证券', position: '科技行业分析师', reviewStatus: 'rejected', cardSeed: 'equity6' },
-        { id: 'u7', name: '孙丽华', phone: '181****7723', email: 'slh@example.com', company: '国泰基金', position: '基金经理', reviewStatus: 'pending', cardSeed: 'bond7' },
-        { id: 'u8', name: '周建国', phone: '182****8834', email: 'zjg@example.com', company: '平安资管', position: '量化研究员', reviewStatus: 'approved', cardSeed: 'quant8' },
-        { id: 'u9', name: '吴晓峰', phone: '183****2245', email: 'wxf@example.com', company: '博时基金', position: '研究总监', reviewStatus: 'rejected', cardSeed: 'trade9' },
-        { id: 'u10', name: '郑雅婷', phone: '184****5567', email: 'zyt@example.com', company: '汇添富基金', position: '基金经理', reviewStatus: 'pending', cardSeed: 'capital10' },
-        { id: 'u11', name: '黄志远', phone: '185****6678', email: 'hzr@example.com', company: '工银瑞信', position: '固收基金经理', reviewStatus: 'approved', cardSeed: 'asset11' },
-        { id: 'u12', name: '林思远', phone: '186****7789', email: 'lsr@example.com', company: '建信基金', position: '债券研究员', reviewStatus: 'pending', cardSeed: 'bank12' },
+        { id: 'u1', name: '王建华', phone: '138****8801', email: 'wjh@example.com', company: '华夏基金', position: '基金经理', userType: '买方', reviewStatus: 'approved', cardSeed: 'finance1' },
+        { id: 'u2', name: '李梦琪', phone: '139****2234', email: 'lmq@example.com', company: '南方基金', position: '研究员', userType: '买方', reviewStatus: 'approved', cardSeed: 'fund2' },
+        { id: 'u3', name: '张伟', phone: '135****5567', email: 'zw@example.com', company: '招商证券', position: '分析师', userType: '卖方', reviewStatus: 'approved', cardSeed: 'securities3' },
+        { id: 'u4', name: '陈晓燕', phone: '136****7890', email: 'cxy@example.com', company: '易方达基金', position: '投资总监', userType: '买方', reviewStatus: 'pending', cardSeed: 'invest4' },
+        { id: 'u5', name: '刘强', phone: '137****3312', email: 'lq@example.com', company: '广发证券', position: '策略分析师', userType: '卖方', reviewStatus: 'approved', cardSeed: 'research5' },
+        { id: 'u6', name: '赵明', phone: '180****4456', email: 'zm@example.com', company: '中信证券', position: '科技行业分析师', userType: '卖方', reviewStatus: 'rejected', cardSeed: 'equity6' },
+        { id: 'u7', name: '孙丽华', phone: '181****7723', email: 'slh@example.com', company: '国泰基金', position: '基金经理', userType: '买方', reviewStatus: 'pending', cardSeed: 'bond7' },
+        { id: 'u8', name: '周建国', phone: '182****8834', email: 'zjg@example.com', company: '平安资管', position: '量化研究员', userType: '买方', reviewStatus: 'approved', cardSeed: 'quant8' },
+        { id: 'u9', name: '吴晓峰', phone: '183****2245', email: 'wxf@example.com', company: '博时基金', position: '研究总监', userType: '买方', reviewStatus: 'rejected', cardSeed: 'trade9' },
+        { id: 'u10', name: '郑雅婷', phone: '184****5567', email: 'zyt@example.com', company: '汇添富基金', position: '基金经理', userType: '买方', reviewStatus: 'pending', cardSeed: 'capital10' },
+        { id: 'u11', name: '黄志远', phone: '185****6678', email: 'hzr@example.com', company: '工银瑞信', position: '固收基金经理', userType: '买方', reviewStatus: 'approved', cardSeed: 'asset11' },
+        { id: 'u12', name: '林思远', phone: '186****7789', email: 'lsr@example.com', company: '建信基金', position: '债券研究员', userType: '买方', reviewStatus: 'pending', cardSeed: 'bank12' },
     ];
 
     // 当前新增用户弹窗中上传的名片数据
@@ -384,6 +399,7 @@
                                     <tr class="text-xs text-gray-400 border-b border-gray-50">
                                         <th class="text-left px-5 py-3 font-medium">用户信息</th>
                                         <th class="text-left px-5 py-3 font-medium">所属机构</th>
+                                        <th class="text-left px-5 py-3 font-medium">用户类型</th>
                                         <th class="text-left px-5 py-3 font-medium">电话</th>
                                         <th class="text-left px-5 py-3 font-medium">邮箱</th>
                                         <th class="text-left px-5 py-3 font-medium">审核状态</th>
@@ -392,7 +408,7 @@
                                 </thead>
                                 <tbody>
                                     ${filtered.length === 0 ? `
-                                        <tr><td colspan="6" class="px-5 py-16 text-center text-sm text-gray-400">
+                                        <tr><td colspan="7" class="px-5 py-16 text-center text-sm text-gray-400">
                                             <i class="ri-inbox-line text-4xl block mb-2 text-gray-300"></i>暂无数据
                                         </td></tr>
                                     ` : filtered.map(u => `
@@ -407,6 +423,7 @@
                                                 </div>
                                             </td>
                                             <td class="px-5 py-4 text-sm text-gray-600">${u.company}</td>
+                                            <td class="px-5 py-4">${u.userType === '买方' ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-600">买方</span>' : '<span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-orange-50 text-orange-600">卖方</span>'}</td>
                                             <td class="px-5 py-4 text-sm text-gray-600">${u.phone}</td>
                                             <td class="px-5 py-4 text-sm text-gray-600">${u.email}</td>
                                             <td class="px-5 py-4">${renderStatusTag(u.reviewStatus)}</td>
@@ -520,6 +537,32 @@
     }
 
     // ============ 新增用户弹窗 ============
+    let selectedUserType = '';
+
+    function selectUserType(type) {
+        selectedUserType = type;
+        const buyerLabel = document.getElementById('userTypeBuyerLabel');
+        const sellerLabel = document.getElementById('userTypeSellerLabel');
+
+        // Reset both
+        buyerLabel.classList.remove('border-red-400', 'bg-red-50');
+        sellerLabel.classList.remove('border-red-400', 'bg-red-50');
+        buyerLabel.querySelector('i').classList.remove('text-red-500');
+        sellerLabel.querySelector('i').classList.remove('text-red-500');
+        buyerLabel.querySelector('span').classList.remove('text-red-600', 'font-medium');
+        sellerLabel.querySelector('span').classList.remove('text-red-600', 'font-medium');
+
+        if (type === '买方') {
+            buyerLabel.classList.add('border-red-400', 'bg-red-50');
+            buyerLabel.querySelector('i').classList.add('text-red-500');
+            buyerLabel.querySelector('span').classList.add('text-red-600', 'font-medium');
+        } else if (type === '卖方') {
+            sellerLabel.classList.add('border-red-400', 'bg-red-50');
+            sellerLabel.querySelector('i').classList.add('text-red-500');
+            sellerLabel.querySelector('span').classList.add('text-red-600', 'font-medium');
+        }
+    }
+
     function openAddUserModal() {
         // 清空表单
         document.getElementById('addUserName').value = '';
@@ -527,6 +570,9 @@
         document.getElementById('addUserPosition').value = '';
         document.getElementById('addUserPhone').value = '';
         document.getElementById('addUserEmail').value = '';
+
+        // 重置用户类型
+        selectUserType('');
 
         // 重置名片上传
         addUserCardData = null;
@@ -571,6 +617,8 @@
         const position = document.getElementById('addUserPosition').value.trim();
         const phone = document.getElementById('addUserPhone').value.trim();
         const email = document.getElementById('addUserEmail').value.trim();
+        const userTypeRadio = document.querySelector('input[name="userType"]:checked');
+        const userType = userTypeRadio ? userTypeRadio.value : '';
 
         if (!name) {
             document.getElementById('addUserName').classList.add('ring-2', 'ring-red-300');
@@ -584,6 +632,15 @@
             setTimeout(() => document.getElementById('addUserCompany').classList.remove('ring-2', 'ring-red-300'), 1500);
             return;
         }
+        if (!userType) {
+            document.getElementById('userTypeBuyerLabel').classList.add('ring-2', 'ring-red-300');
+            document.getElementById('userTypeSellerLabel').classList.add('ring-2', 'ring-red-300');
+            setTimeout(() => {
+                document.getElementById('userTypeBuyerLabel').classList.remove('ring-2', 'ring-red-300');
+                document.getElementById('userTypeSellerLabel').classList.remove('ring-2', 'ring-red-300');
+            }, 1500);
+            return;
+        }
 
         const newId = 'u' + (Date.now() % 100000);
         const newSeed = 'card' + Date.now();
@@ -595,6 +652,7 @@
             company: company,
             position: position || '-',
             reviewStatus: 'pending',
+            userType: userType,
             cardSeed: newSeed,
             cardData: addUserCardData  // 存储上传的名片 base64
         });
