@@ -39,8 +39,8 @@
 
     <!-- 审核弹窗 -->
     <div id="reviewModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
-        <div class="bg-white rounded-2xl shadow-xl w-[480px] max-w-[90vw]">
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div class="bg-white rounded-2xl shadow-xl w-[640px] max-w-[90vw] max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
                 <h3 class="text-base font-semibold text-gray-800">用户审核</h3>
                 <button onclick="closeReviewModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                     <i class="ri-close-line text-gray-400 text-lg"></i>
@@ -73,10 +73,9 @@
         </div>
     </div>
 
-    <!-- 新增用户弹窗 -->
     <div id="addUserModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
-        <div class="bg-white rounded-xl shadow-xl w-[480px] max-w-[90vw]">
-            <div class="flex items-center justify-between p-5 border-b border-gray-100">
+        <div class="bg-white rounded-xl shadow-xl w-[640px] max-w-[90vw] max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between p-5 border-b border-gray-100 sticky top-0 bg-white z-10">
                 <h3 class="text-lg font-semibold text-gray-900">新增用户</h3>
                 <button onclick="closeAddUserModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><i class="ri-close-line text-xl"></i></button>
             </div>
@@ -109,6 +108,52 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">职位</label>
                         <input type="text" id="addUserPosition" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50" placeholder="请输入职位">
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">性别 <span class="text-red-500">*</span></label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="addUserGender" value="男" class="accent-red-500">
+                                <span class="text-sm text-gray-700">男</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="addUserGender" value="女" class="accent-red-500">
+                                <span class="text-sm text-gray-700">女</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">所在地 <span class="text-red-500">*</span></label>
+                            <input type="text" id="addUserCity" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50" placeholder="如：上海">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">从业年限</label>
+                            <input type="number" id="addUserYears" min="0" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50" placeholder="如：10">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">擅长领域 <span class="text-red-500">*</span></label>
+                        <input type="text" id="addUserSpecialties" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50" placeholder="如：A股策略、宏观分析、行业研究">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">个人简介 <span class="text-red-500">*</span></label>
+                        <textarea id="addUserBio" rows="3" class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50 resize-none" placeholder="请输入个人简介"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">职业证明</label>
+                        <div id="certUploadArea" class="relative border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-red-300 hover:bg-red-50/30 transition-colors cursor-pointer" onclick="document.getElementById('certFileInput').click()">
+                            <div id="certUploadPlaceholder">
+                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2"><i class="ri-file-upload-line text-gray-400 text-lg"></i></div>
+                                <p class="text-sm text-gray-500">点击上传职业证明</p>
+                                <p class="text-xs text-gray-400 mt-1">支持 JPG、PNG、PDF 格式，上限 5MB</p>
+                            </div>
+                            <div id="certUploadPreview" class="hidden">
+                                <img id="certPreviewImg" class="max-h-32 mx-auto rounded-lg shadow-sm cursor-zoom-in" alt="职业证明预览" onclick="event.stopPropagation();previewImage('certPreviewImg')">
+                                <p class="text-xs text-gray-400 mt-2">点击图片放大查看 · 点击区域重新上传</p>
+                            </div>
+                        </div>
+                        <input type="file" id="certFileInput" class="hidden" accept="image/jpeg,image/png,application/pdf" onchange="handleCertUpload(this)">
+                    </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">电话</label>
@@ -122,17 +167,17 @@
                     <!-- 名片上传 -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">用户名片</label>
-                        <div id="cardUploadArea" class="relative border-2 border-dashed border-gray-200 rounded-xl p-5 text-center hover:border-red-300 hover:bg-red-50/30 transition-colors cursor-pointer" onclick="document.getElementById('cardFileInput').click()">
-                            <div id="cardUploadPlaceholder">
+                        <div id="cardUploadArea2" class="relative border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-red-300 hover:bg-red-50/30 transition-colors cursor-pointer" onclick="document.getElementById('cardFileInput').click()">
+                            <div id="cardUploadPlaceholder2">
                                 <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2">
                                     <i class="ri-image-add-line text-gray-400 text-lg"></i>
                                 </div>
                                 <p class="text-sm text-gray-500">点击上传用户名片</p>
                                 <p class="text-xs text-gray-400 mt-1">支持 JPG、PNG 格式</p>
                             </div>
-                            <div id="cardUploadPreview" class="hidden">
-                                <img id="cardPreviewImg" class="max-h-40 mx-auto rounded-lg shadow-sm" alt="名片预览">
-                                <p class="text-xs text-gray-400 mt-2">点击重新上传</p>
+                            <div id="cardUploadPreview2" class="hidden">
+                                <img id="cardPreviewImg" class="max-h-40 mx-auto rounded-lg shadow-sm cursor-zoom-in" alt="名片预览" onclick="event.stopPropagation();previewImage('cardPreviewImg')">
+                                <p class="text-xs text-gray-400 mt-2">点击图片放大查看 · 点击区域重新上传</p>
                             </div>
                         </div>
                         <input type="file" id="cardFileInput" class="hidden" accept="image/jpeg,image/png,image/webp" onchange="handleCardUpload(this)">
@@ -146,28 +191,41 @@
         </div>
     </div>
 
+    <!-- 图片查看器 -->
+    <div id="imageViewer" class="fixed inset-0 z-[60] hidden items-center justify-center" style="background: rgba(0,0,0,0.85);" onclick="closeImageViewer()">
+        <button class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors z-10" onclick="closeImageViewer()"><i class="ri-close-line text-xl"></i></button>
+        <img id="imageViewerImg" class="max-w-[90vw] max-h-[85vh] object-contain rounded-lg shadow-2xl" alt="预览图片" onclick="event.stopPropagation()">
+    </div>
+
     <script>
     // ============ 数据 ============
     // 模拟名片图颜色种子（用于生成不同风格的名片）
     const cardSeeds = ['finance1','fund2','securities3','invest4','research5','equity6','bond7','quant8','trade9','capital10','asset11','bank12'];
 
     const users = [
-        { id: 'u1', name: '王建华', phone: '138****8801', email: 'wjh@example.com', company: '华夏基金', position: '基金经理', userType: '买方', reviewStatus: 'approved', cardSeed: 'finance1' },
-        { id: 'u2', name: '李梦琪', phone: '139****2234', email: 'lmq@example.com', company: '南方基金', position: '研究员', userType: '买方', reviewStatus: 'approved', cardSeed: 'fund2' },
-        { id: 'u3', name: '张伟', phone: '135****5567', email: 'zw@example.com', company: '招商证券', position: '分析师', userType: '卖方', reviewStatus: 'approved', cardSeed: 'securities3' },
-        { id: 'u4', name: '陈晓燕', phone: '136****7890', email: 'cxy@example.com', company: '易方达基金', position: '投资总监', userType: '买方', reviewStatus: 'pending', cardSeed: 'invest4' },
-        { id: 'u5', name: '刘强', phone: '137****3312', email: 'lq@example.com', company: '广发证券', position: '策略分析师', userType: '卖方', reviewStatus: 'approved', cardSeed: 'research5' },
-        { id: 'u6', name: '赵明', phone: '180****4456', email: 'zm@example.com', company: '中信证券', position: '科技行业分析师', userType: '卖方', reviewStatus: 'rejected', cardSeed: 'equity6' },
-        { id: 'u7', name: '孙丽华', phone: '181****7723', email: 'slh@example.com', company: '国泰基金', position: '基金经理', userType: '买方', reviewStatus: 'pending', cardSeed: 'bond7' },
-        { id: 'u8', name: '周建国', phone: '182****8834', email: 'zjg@example.com', company: '平安资管', position: '量化研究员', userType: '买方', reviewStatus: 'approved', cardSeed: 'quant8' },
-        { id: 'u9', name: '吴晓峰', phone: '183****2245', email: 'wxf@example.com', company: '博时基金', position: '研究总监', userType: '买方', reviewStatus: 'rejected', cardSeed: 'trade9' },
-        { id: 'u10', name: '郑雅婷', phone: '184****5567', email: 'zyt@example.com', company: '汇添富基金', position: '基金经理', userType: '买方', reviewStatus: 'pending', cardSeed: 'capital10' },
-        { id: 'u11', name: '黄志远', phone: '185****6678', email: 'hzr@example.com', company: '工银瑞信', position: '固收基金经理', userType: '买方', reviewStatus: 'approved', cardSeed: 'asset11' },
-        { id: 'u12', name: '林思远', phone: '186****7789', email: 'lsr@example.com', company: '建信基金', position: '债券研究员', userType: '买方', reviewStatus: 'pending', cardSeed: 'bank12' },
+        { id: 'u1', name: '王建华', phone: '138****8801', email: 'wjh@example.com', company: '华夏基金', position: '基金经理', userType: '买方', gender: '男', city: '上海', years: 15, specialties: 'A股策略、宏观分析', bio: '拥有超15年公募基金投资管理经验，擅长自上而下的策略研究和行业配置。', certData: mockCertImage('王建华'), reviewStatus: 'approved', cardSeed: 'finance1' },
+        { id: 'u2', name: '李梦琪', phone: '139****2234', email: 'lmq@example.com', company: '南方基金', position: '研究员', userType: '买方', gender: '女', city: '深圳', years: 6, specialties: '行业研究、公司调研', bio: '专注于消费和医药行业研究，拥有CFA持证人资格。', reviewStatus: 'approved', cardSeed: 'fund2' },
+        { id: 'u3', name: '张伟', phone: '135****5567', email: 'zw@example.com', company: '招商证券', position: '分析师', userType: '卖方', gender: '男', city: '北京', years: 8, specialties: '策略研究、量化分析', bio: '擅长量化策略研究和A股市场分析，多次获新财富最佳分析师。', certData: mockCertImage('张伟'), reviewStatus: 'approved', cardSeed: 'securities3' },
+        { id: 'u4', name: '陈晓燕', phone: '136****7890', email: 'cxy@example.com', company: '易方达基金', position: '投资总监', userType: '买方', gender: '女', city: '广州', years: 12, specialties: '固收投资、资产配置', bio: '深耕固定收益投资领域多年，管理规模超千亿。', reviewStatus: 'pending', cardSeed: 'invest4' },
+        { id: 'u5', name: '刘强', phone: '137****3312', email: 'lq@example.com', company: '广发证券', position: '策略分析师', userType: '卖方', gender: '男', city: '上海', years: 10, specialties: '宏观策略、全球市场', bio: '拥有全球宏观视野，善于把握市场周期和风格切换。', certData: mockCertImage('刘强'), reviewStatus: 'approved', cardSeed: 'research5' },
+        { id: 'u6', name: '赵明', phone: '180****4456', email: 'zm@example.com', company: '中信证券', position: '科技行业分析师', userType: '卖方', gender: '男', city: '深圳', years: 7, specialties: 'AI、半导体、云计算', bio: '聚焦科技行业研究，覆盖人工智能、芯片和云计算赛道。', reviewStatus: 'rejected', cardSeed: 'equity6' },
+        { id: 'u7', name: '孙丽华', phone: '181****7723', email: 'slh@example.com', company: '国泰基金', position: '基金经理', userType: '买方', gender: '女', city: '上海', years: 9, specialties: '消费行业、港股投资', bio: '专注消费主题投资，港股通产品管理经验丰富。', reviewStatus: 'pending', cardSeed: 'bond7' },
+        { id: 'u8', name: '周建国', phone: '182****8834', email: 'zjg@example.com', company: '平安资管', position: '量化研究员', userType: '买方', gender: '男', city: '深圳', years: 5, specialties: '量化因子、程序化交易', bio: '擅长多因子模型构建与优化，量化策略研发经验丰富。', reviewStatus: 'approved', cardSeed: 'quant8' },
+        { id: 'u9', name: '吴晓峰', phone: '183****2245', email: 'wxf@example.com', company: '博时基金', position: '研究总监', userType: '买方', gender: '男', city: '北京', years: 18, specialties: '宏观研究、政策解读', bio: '拥有政府与金融机构双重背景，对宏观政策理解深入。', reviewStatus: 'rejected', cardSeed: 'trade9' },
+        { id: 'u10', name: '郑雅婷', phone: '184****5567', email: 'zyt@example.com', company: '汇添富基金', position: '基金经理', userType: '买方', gender: '女', city: '上海', years: 11, specialties: '医药投资、创新药研究', bio: '医药行业专家型基金经理，临床医学博士出身。', reviewStatus: 'pending', cardSeed: 'capital10' },
+        { id: 'u11', name: '黄志远', phone: '185****6678', email: 'hzr@example.com', company: '工银瑞信', position: '固收基金经理', userType: '买方', gender: '男', city: '北京', years: 14, specialties: '固收投资、利率策略', bio: '固收领域资深基金经理，曾获金牛奖固收类奖项。', reviewStatus: 'approved', cardSeed: 'asset11' },
+        { id: 'u12', name: '林思远', phone: '186****7789', email: 'lsr@example.com', company: '建信基金', position: '债券研究员', userType: '买方', gender: '男', city: '深圳', years: 4, specialties: '信用债、可转债研究', bio: '专注于信用债和可转债研究，对债市信用风险判断精准。', reviewStatus: 'pending', cardSeed: 'bank12' },
     ];
 
     // 当前新增用户弹窗中上传的名片数据
     let addUserCardData = null;
+    let addUserCertData = null;
+    let editingUserId = null;  // null = 新增模式，有值 = 编辑模式
+
+    // 生成模拟职业证明占位图
+    function mockCertImage(name) {
+        return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="280"><rect width="400" height="280" fill="#f8fafc" rx="8"/><rect x="20" y="20" width="360" height="40" fill="#ef4444" rx="4"/><text x="200" y="46" text-anchor="middle" fill="white" font-size="16" font-weight="bold">职业证明</text><text x="200" y="100" text-anchor="middle" fill="#1e293b" font-size="14">兹证明</text><text x="200" y="130" text-anchor="middle" fill="#1e293b" font-size="18" font-weight="bold">' + name + '</text><text x="200" y="160" text-anchor="middle" fill="#64748b" font-size="12">持有相关执业资格，具备专业能力</text><line x1="40" y1="220" x2="360" y2="220" stroke="#e2e8f0" stroke-width="1"/><text x="200" y="248" text-anchor="middle" fill="#94a3b8" font-size="11">北极星管理平台 · 审核认证</text></svg>');
+    }
 
     let currentFilter = 'all';
     let searchKeyword = '';
@@ -428,6 +486,7 @@
                                             <td class="px-5 py-4 text-sm text-gray-600">${u.email}</td>
                                             <td class="px-5 py-4">${renderStatusTag(u.reviewStatus)}</td>
                                             <td class="px-5 py-4">
+                                                <button onclick="openEditUserModal('${u.id}')" class="text-xs text-blue-500 hover:text-blue-600 cursor-pointer whitespace-nowrap px-2 py-1 rounded hover:bg-blue-50 transition-colors mr-1">编辑</button>
                                                 <button onclick="openReviewModal('${u.id}')" class="text-xs text-gray-500 hover:text-red-600 cursor-pointer whitespace-nowrap px-2 py-1 rounded hover:bg-red-50 transition-colors">审核</button>
                                             </td>
                                         </tr>
@@ -479,19 +538,68 @@
         if (!user) return;
 
         document.getElementById('reviewUserInfo').innerHTML = `
-            <div class="flex gap-4">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                        ${renderAvatar(user.name)}
-                        <div>
-                            <div class="text-sm font-medium text-gray-800">${user.name}</div>
-                            <div class="text-xs text-gray-400">${user.position} · ${user.company}</div>
-                            <div class="text-xs text-gray-400 mt-1">${user.phone} · ${user.email}</div>
-                        </div>
-                    </div>
+            <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl mb-4">
+                ${renderAvatar(user.name)}
+                <div>
+                    <div class="text-sm font-medium text-gray-800">${user.name}</div>
+                    <div class="text-xs text-gray-400">${user.position} · ${user.company}</div>
                 </div>
             </div>
-            <div class="mt-3">
+            <div class="space-y-3">
+                <div class="flex items-center justify-between py-2.5 border-b border-gray-50">
+                    <span class="text-sm text-gray-500">用户类型</span>
+                    <span class="text-sm font-medium ${user.userType === '买方' ? 'text-blue-600' : 'text-orange-600'}">${user.userType || '-'}</span>
+                </div>
+                <div class="flex items-center justify-between py-2.5 border-b border-gray-50">
+                    <span class="text-sm text-gray-500">性别</span>
+                    <span class="text-sm text-gray-800">${user.gender || '-'}</span>
+                </div>
+                <div class="flex items-center justify-between py-2.5 border-b border-gray-50">
+                    <span class="text-sm text-gray-500">所在地</span>
+                    <span class="text-sm text-gray-800">${user.city || '-'}</span>
+                </div>
+                <div class="flex items-center justify-between py-2.5 border-b border-gray-50">
+                    <span class="text-sm text-gray-500">从业年限</span>
+                    <span class="text-sm text-gray-800">${user.years ? user.years + '年' : '-'}</span>
+                </div>
+                <div class="flex items-center justify-between py-2.5 border-b border-gray-50">
+                    <span class="text-sm text-gray-500">电话</span>
+                    <span class="text-sm text-gray-800">${user.phone || '-'}</span>
+                </div>
+                <div class="flex items-center justify-between py-2.5 border-b border-gray-50">
+                    <span class="text-sm text-gray-500">邮箱</span>
+                    <span class="text-sm text-gray-800">${user.email || '-'}</span>
+                </div>
+                <div class="py-2.5 border-b border-gray-50">
+                    <span class="text-sm text-gray-500 mb-1.5 block">擅长领域</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        ${user.specialties ? user.specialties.split(/[,，]/).map(s => '<span class="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">' + s.trim() + '</span>').join('') : '<span class="text-sm text-gray-400">-</span>'}
+                    </div>
+                </div>
+                <div class="py-2.5 border-b border-gray-50">
+                    <span class="text-sm text-gray-500 mb-1.5 block">个人简介</span>
+                    <p class="text-sm text-gray-800 leading-relaxed">${user.bio || '-'}</p>
+                </div>
+                <div class="py-2.5 border-b border-gray-50">
+                    <span class="text-sm text-gray-500 mb-1.5 block">职业证明</span>
+                    ${user.certData
+                        ? `<div class="rounded-lg border border-green-200 bg-green-50 p-3 flex items-center gap-3 cursor-pointer hover:bg-green-100 transition-colors">
+                            <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0"><i class="ri-file-pdf-line text-green-500 text-lg"></i></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm text-green-700 font-medium truncate">职业证明文件</div>
+                                <div class="text-xs text-green-500 mt-0.5">已上传</div>
+                            </div>
+                        </div>`
+                        : `<div class="rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 p-4 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2"><i class="ri-file-upload-line text-gray-400 text-lg"></i></div>
+                                <p class="text-sm text-gray-400">暂无职业证明</p>
+                            </div>
+                        </div>`
+                    }
+                </div>
+            </div>
+            <div class="mt-4">
                 <div class="text-xs text-gray-400 mb-2 font-medium">用户名片</div>
                 <div class="rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
                     ${user.cardData
@@ -536,8 +644,78 @@
         render();
     }
 
-    // ============ 新增用户弹窗 ============
+    // ============ 新增/编辑用户弹窗 ============
     let selectedUserType = '';
+
+    function openEditUserModal(userId) {
+        editingUserId = userId;
+        openUserModal(userId);
+    }
+
+    function openAddUserModal() {
+        editingUserId = null;
+        openUserModal(null);
+    }
+
+    function openUserModal(userId) {
+        const user = userId ? users.find(u => u.id === userId) : null;
+        const isEdit = !!user;
+
+        // 设置标题和按钮文字
+        const modal = document.getElementById('addUserModal');
+        modal.querySelector('h3').textContent = isEdit ? '编辑用户' : '新增用户';
+        modal.querySelector('button[onclick*="submit"]').textContent = isEdit ? '保存修改' : '确认新增';
+
+        // 清空或填充表单
+        document.getElementById('addUserName').value = user ? user.name : '';
+        document.getElementById('addUserCompany').value = user ? user.company : '';
+        document.getElementById('addUserPosition').value = user ? user.position : '';
+        document.getElementById('addUserPhone').value = user ? user.phone : '';
+        document.getElementById('addUserEmail').value = user ? user.email : '';
+        document.getElementById('addUserCity').value = user ? user.city || '' : '';
+        document.getElementById('addUserYears').value = user ? user.years || '' : '';
+        document.getElementById('addUserSpecialties').value = user ? user.specialties || '' : '';
+        document.getElementById('addUserBio').value = user ? user.bio || '' : '';
+
+        // 重置性别
+        const genderRadios = document.querySelectorAll('input[name="addUserGender"]');
+        genderRadios.forEach(r => r.checked = false);
+        if (user && user.gender) {
+            genderRadios.forEach(r => { if (r.value === user.gender) r.checked = true; });
+        }
+
+        // 设置用户类型
+        selectUserType(user ? user.userType || '' : '');
+
+        // 重置/恢复名片上传
+        addUserCardData = user ? user.cardData : null;
+        if (user && user.cardData) {
+            document.getElementById('cardUploadPlaceholder2').classList.add('hidden');
+            document.getElementById('cardUploadPreview2').classList.remove('hidden');
+            document.getElementById('cardPreviewImg').src = user.cardData;
+        } else {
+            addUserCardData = null;
+            document.getElementById('cardUploadPlaceholder2').classList.remove('hidden');
+            document.getElementById('cardUploadPreview2').classList.add('hidden');
+        }
+        document.getElementById('cardFileInput').value = '';
+
+        // 重置/恢复职业证明
+        addUserCertData = user ? user.certData : null;
+        if (user && user.certData) {
+            document.getElementById('certUploadPlaceholder').classList.add('hidden');
+            document.getElementById('certUploadPreview').classList.remove('hidden');
+            document.getElementById('certPreviewImg').src = user.certData;
+        } else {
+            addUserCertData = null;
+            document.getElementById('certUploadPlaceholder').classList.remove('hidden');
+            document.getElementById('certUploadPreview').classList.add('hidden');
+        }
+        document.getElementById('certFileInput').value = '';
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
 
     function selectUserType(type) {
         selectedUserType = type;
@@ -563,32 +741,27 @@
         }
     }
 
-    function openAddUserModal() {
-        // 清空表单
-        document.getElementById('addUserName').value = '';
-        document.getElementById('addUserCompany').value = '';
-        document.getElementById('addUserPosition').value = '';
-        document.getElementById('addUserPhone').value = '';
-        document.getElementById('addUserEmail').value = '';
-
-        // 重置用户类型
-        selectUserType('');
-
-        // 重置名片上传
-        addUserCardData = null;
-        document.getElementById('cardUploadPlaceholder').classList.remove('hidden');
-        document.getElementById('cardUploadPreview').classList.add('hidden');
-        document.getElementById('cardFileInput').value = '';
-
-        const modal = document.getElementById('addUserModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-
     function closeAddUserModal() {
         const modal = document.getElementById('addUserModal');
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+        editingUserId = null;
+    }
+
+    // ============ 图片查看器 ============
+    function previewImage(imgElementId) {
+        const img = document.getElementById(imgElementId);
+        const viewer = document.getElementById('imageViewer');
+        const viewerImg = document.getElementById('imageViewerImg');
+        viewerImg.src = img.src;
+        viewer.classList.remove('hidden');
+        viewer.classList.add('flex');
+    }
+
+    function closeImageViewer() {
+        const viewer = document.getElementById('imageViewer');
+        viewer.classList.add('hidden');
+        viewer.classList.remove('flex');
     }
 
     // ============ 名片上传处理 ============
@@ -605,8 +778,27 @@
             addUserCardData = e.target.result;
             const preview = document.getElementById('cardPreviewImg');
             preview.src = addUserCardData;
-            document.getElementById('cardUploadPlaceholder').classList.add('hidden');
-            document.getElementById('cardUploadPreview').classList.remove('hidden');
+            document.getElementById('cardUploadPlaceholder2').classList.add('hidden');
+            document.getElementById('cardUploadPreview2').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ============ 职业证明上传处理 ============
+    function handleCertUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+            alert('文件大小不能超过 5MB');
+            input.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            addUserCertData = e.target.result;
+            document.getElementById('certUploadPlaceholder').classList.add('hidden');
+            document.getElementById('certUploadPreview').classList.remove('hidden');
+            document.getElementById('certPreviewImg').src = addUserCertData;
         };
         reader.readAsDataURL(file);
     }
@@ -617,6 +809,12 @@
         const position = document.getElementById('addUserPosition').value.trim();
         const phone = document.getElementById('addUserPhone').value.trim();
         const email = document.getElementById('addUserEmail').value.trim();
+        const city = document.getElementById('addUserCity').value.trim();
+        const years = parseInt(document.getElementById('addUserYears').value) || 0;
+        const specialties = document.getElementById('addUserSpecialties').value.trim();
+        const bio = document.getElementById('addUserBio').value.trim();
+        const genderRadio = document.querySelector('input[name="addUserGender"]:checked');
+        const gender = genderRadio ? genderRadio.value : '';
         const userTypeRadio = document.querySelector('input[name="userType"]:checked');
         const userType = userTypeRadio ? userTypeRadio.value : '';
 
@@ -641,21 +839,46 @@
             }, 1500);
             return;
         }
+        if (!gender) {
+            alert('请选择性别');
+            return;
+        }
+        if (!city) {
+            document.getElementById('addUserCity').classList.add('ring-2', 'ring-red-300');
+            document.getElementById('addUserCity').focus();
+            setTimeout(() => document.getElementById('addUserCity').classList.remove('ring-2', 'ring-red-300'), 1500);
+            return;
+        }
+        if (!specialties) {
+            document.getElementById('addUserSpecialties').classList.add('ring-2', 'ring-red-300');
+            document.getElementById('addUserSpecialties').focus();
+            setTimeout(() => document.getElementById('addUserSpecialties').classList.remove('ring-2', 'ring-red-300'), 1500);
+            return;
+        }
+        if (!bio) {
+            document.getElementById('addUserBio').classList.add('ring-2', 'ring-red-300');
+            document.getElementById('addUserBio').focus();
+            setTimeout(() => document.getElementById('addUserBio').classList.remove('ring-2', 'ring-red-300'), 1500);
+            return;
+        }
 
-        const newId = 'u' + (Date.now() % 100000);
-        const newSeed = 'card' + Date.now();
-        users.push({
-            id: newId,
-            name: name,
-            phone: phone || '-',
-            email: email || '-',
-            company: company,
-            position: position || '-',
-            reviewStatus: 'pending',
-            userType: userType,
-            cardSeed: newSeed,
-            cardData: addUserCardData  // 存储上传的名片 base64
-        });
+        if (editingUserId) {
+            // 编辑模式：更新已有用户
+            const idx = users.findIndex(u => u.id === editingUserId);
+            if (idx > -1) {
+                users[idx] = { ...users[idx], name, phone: phone || '-', email: email || '-', company, position: position || '-', gender, city, years, specialties, bio, userType,
+                    cardData: addUserCardData || users[idx].cardData,
+                    certData: addUserCertData || users[idx].certData };
+            }
+        } else {
+            // 新增模式
+            const newId = 'u' + (Date.now() % 100000);
+            const newSeed = 'card' + Date.now();
+            users.push({
+                id: newId, name, phone: phone || '-', email: email || '-', company, position: position || '-', gender, city, years, specialties, bio,
+                reviewStatus: 'pending', userType, cardSeed: newSeed, cardData: addUserCardData, certData: addUserCertData
+            });
+        }
 
         closeAddUserModal();
         render();
