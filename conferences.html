@@ -65,14 +65,14 @@
 <script>
 // ============ 数据 ============
 let conferences = [
-    { id: 'c1', title: '2026年A股市场展望：结构性机会与风险防范', experts: [{name:'张明远',inst:'国泰海通证券'}], tags: ['券商','行业分析','宏观解读','A股','策略'], time: '2026-04-10 14:00', registrations: 328, status: '即将开始', permission: '买方', link: 'https://meeting.tencent.com/dm/xxx001', desc: '深度解读2026年A股市场的结构性机会，涵盖宏观政策、行业配置和个股策略。', materials: ['A股策略报告.pdf','宏观数据.xlsx'] },
-    { id: 'c2', title: '人工智能赋能金融：大模型在投研领域的实践探索', experts: [{name:'李晓峰',inst:'华锐技术'}], tags: ['人工智能','大模型','投研','金融科技','高管'], time: '2026-04-08 15:30', registrations: 256, status: '直播中', permission: '订阅会员', link: 'https://meeting.tencent.com/dm/xxx002', desc: '探讨大语言模型在金融投研场景中的落地应用与未来发展趋势。', materials: ['AI投研白皮书.pdf'] },
-    { id: 'c3', title: '债券市场利率走势分析与配置策略', experts: [{name:'王雅婷',inst:'固金证券'}], tags: ['债券','利率','固收','深度专访','金融'], time: '2026-03-29 10:00', registrations: 189, status: '已结束', permission: '买方', link: 'https://meeting.tencent.com/dm/xxx003', desc: '分析当前债券市场利率走势，提供机构投资者债券配置建议。', materials: ['利率分析报告.pdf','配置建议.xlsx'] },
-    { id: 'c4', title: '港股科技板块：估值修复与催化剂分析', experts: [{name:'陈志远',inst:'东吴证券'}], tags: ['港股','科技','估值','独家会议','互联网'], time: '2026-03-21 14:00', registrations: 145, status: '已结束', permission: '卖方', link: 'https://meeting.tencent.com/dm/xxx004', desc: '深入分析港股科技板块的估值修复逻辑及未来催化剂。', materials: ['港股科技报告.pdf'] },
-    { id: 'c5', title: '新能源汽车产业链：竞争格局重塑与投资机会', experts: [{name:'刘思远',inst:'浦发银行投研部'}], tags: ['新能源','汽车','产业链','实地调研','A股'], time: '2026-04-15 09:30', registrations: 412, status: '即将开始', permission: '买方', link: 'https://meeting.tencent.com/dm/xxx005', desc: '实地调研新能源汽车产业链，重塑竞争格局下的投资机会分析。', materials: ['产业链图谱.pdf','调研纪要.docx'] },
-    { id: 'c6', title: '宏观经济政策解读：财政发力与货币配合', experts: [{name:'赵文博',inst:'中信建投'}], tags: ['宏观','财政','货币','政策解读','A股'], time: '2026-04-12 16:00', registrations: 567, status: '即将开始', permission: '订阅会员', link: 'https://meeting.tencent.com/dm/xxx006', desc: '解读最新宏观经济政策，分析财政与货币政策的协同效应。', materials: ['政策解读报告.pdf'] },
-    { id: 'c7', title: '量化投资策略：多因子模型的构建与优化', experts: [{name:'周建国',inst:'申万宏源'}], tags: ['量化','因子','程序化','行业调查','金融'], time: '2026-03-15 14:00', registrations: 98, status: '已结束', permission: '卖方', link: 'https://meeting.tencent.com/dm/xxx007', desc: '分享多因子量化模型的构建方法及实盘优化经验。', materials: ['量化策略报告.pdf','因子库说明.xlsx'] },
-    { id: 'c8', title: '医药行业投资机会：创新药与医疗器械的双轮驱动', experts: [{name:'赵文博',inst:'中信建投'}], tags: ['医药','生物','创新药','医疗器械','专家'], time: '2026-04-18 10:00', registrations: 879, status: '直播中', permission: '买方', link: 'https://meeting.tencent.com/dm/xxx008', desc: '探讨创新药与医疗器械两大赛道的投资机会与风险。', materials: ['医药行业深度报告.pdf','创新药管线.xlsx'] },
+    { id: 'c1', title: '2026年A股市场展望：结构性机会与风险防范', experts: [{name:'张明远',inst:'国泰海通证券'}], tags: ['券商','行业分析','宏观解读','A股','策略'], time: '2026-04-10 14:00', registrations: 328, status: '即将开始', permission: ['买方'], link: 'https://meeting.tencent.com/dm/xxx001', desc: '深度解读2026年A股市场的结构性机会，涵盖宏观政策、行业配置和个股策略。', materials: ['A股策略报告.pdf','宏观数据.xlsx'] },
+    { id: 'c2', title: '人工智能赋能金融：大模型在投研领域的实践探索', experts: [{name:'李晓峰',inst:'华锐技术'}], tags: ['人工智能','大模型','投研','金融科技','高管'], time: '2026-04-08 15:30', registrations: 256, status: '直播中', permission: ['订阅会员'], link: 'https://meeting.tencent.com/dm/xxx002', desc: '探讨大语言模型在金融投研场景中的落地应用与未来发展趋势。', materials: ['AI投研白皮书.pdf'] },
+    { id: 'c3', title: '债券市场利率走势分析与配置策略', experts: [{name:'王雅婷',inst:'固金证券'}], tags: ['债券','利率','固收','深度专访','金融'], time: '2026-03-29 10:00', registrations: 189, status: '已结束', permission: ['买方'], link: 'https://meeting.tencent.com/dm/xxx003', desc: '分析当前债券市场利率走势，提供机构投资者债券配置建议。', materials: ['利率分析报告.pdf','配置建议.xlsx'] },
+    { id: 'c4', title: '港股科技板块：估值修复与催化剂分析', experts: [{name:'陈志远',inst:'东吴证券'}], tags: ['港股','科技','估值','独家会议','互联网'], time: '2026-03-21 14:00', registrations: 145, status: '已结束', permission: ['卖方'], link: 'https://meeting.tencent.com/dm/xxx004', desc: '深入分析港股科技板块的估值修复逻辑及未来催化剂。', materials: ['港股科技报告.pdf'] },
+    { id: 'c5', title: '新能源汽车产业链：竞争格局重塑与投资机会', experts: [{name:'刘思远',inst:'浦发银行投研部'}], tags: ['新能源','汽车','产业链','实地调研','A股'], time: '2026-04-15 09:30', registrations: 412, status: '即将开始', permission: ['买方','卖方'], link: 'https://meeting.tencent.com/dm/xxx005', desc: '实地调研新能源汽车产业链，重塑竞争格局下的投资机会分析。', materials: ['产业链图谱.pdf','调研纪要.docx'] },
+    { id: 'c6', title: '宏观经济政策解读：财政发力与货币配合', experts: [{name:'赵文博',inst:'中信建投'}], tags: ['宏观','财政','货币','政策解读','A股'], time: '2026-04-12 16:00', registrations: 567, status: '即将开始', permission: ['买方','卖方','订阅会员'], link: 'https://meeting.tencent.com/dm/xxx006', desc: '解读最新宏观经济政策，分析财政与货币政策的协同效应。', materials: ['政策解读报告.pdf'] },
+    { id: 'c7', title: '量化投资策略：多因子模型的构建与优化', experts: [{name:'周建国',inst:'申万宏源'}], tags: ['量化','因子','程序化','行业调查','金融'], time: '2026-03-15 14:00', registrations: 98, status: '已结束', permission: ['卖方'], link: 'https://meeting.tencent.com/dm/xxx007', desc: '分享多因子量化模型的构建方法及实盘优化经验。', materials: ['量化策略报告.pdf','因子库说明.xlsx'] },
+    { id: 'c8', title: '医药行业投资机会：创新药与医疗器械的双轮驱动', experts: [{name:'赵文博',inst:'中信建投'}], tags: ['医药','生物','创新药','医疗器械','专家'], time: '2026-04-18 10:00', registrations: 879, status: '直播中', permission: ['买方','订阅会员'], link: 'https://meeting.tencent.com/dm/xxx008', desc: '探讨创新药与医疗器械两大赛道的投资机会与风险。', materials: ['医药行业深度报告.pdf','创新药管线.xlsx'] },
 ];
 
 let searchQuery = '';
@@ -299,6 +299,7 @@ function openConferenceModal(id) {
     // 预设专家
     selectedExpertId = c ? (expertList.find(e => e.name === c.experts[0]?.name)?.id || null) : null;
     selectedExpertName = c ? (c.experts[0]?.name || '') : '';
+    coverData = c ? c.cover || null : null;
     document.getElementById('conferenceModalTitle').textContent = c ? '编辑会议' : '新增会议';
     document.getElementById('conferenceModalBody').innerHTML = `
         <div class="space-y-4">
@@ -344,16 +345,32 @@ function openConferenceModal(id) {
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">会议权限</label>
                 <div class="flex gap-3">
-                    <label class="flex-1 flex items-center justify-center h-10 rounded-lg border-2 cursor-pointer transition-colors hover:border-red-300 ${c&&c.permission==='买方'?'border-red-400 bg-red-50 text-red-600':'border-gray-200 text-gray-500'}" onclick="document.getElementById('mPermBuyer').checked=true;updatePermStyles()">
-                        <input type="radio" id="mPermBuyer" name="mPermission" value="买方" class="hidden" ${c&&c.permission==='买方'?'checked':''}>买方
+                    <label class="flex-1 flex items-center justify-center h-10 rounded-lg border-2 cursor-pointer transition-colors hover:border-red-300 ${c&&c.permission&&c.permission.includes('买方')?'border-red-400 bg-red-50 text-red-600':'border-gray-200 text-gray-500'}" onclick="togglePerm('买方',this)">
+                        <input type="checkbox" name="mPermission" value="买方" class="hidden" ${c&&c.permission&&c.permission.includes('买方')?'checked':''}>买方
                     </label>
-                    <label class="flex-1 flex items-center justify-center h-10 rounded-lg border-2 cursor-pointer transition-colors hover:border-red-300 ${c&&c.permission==='卖方'?'border-red-400 bg-red-50 text-red-600':'border-gray-200 text-gray-500'}" onclick="document.getElementById('mPermSeller').checked=true;updatePermStyles()">
-                        <input type="radio" id="mPermSeller" name="mPermission" value="卖方" class="hidden" ${c&&c.permission==='卖方'?'checked':''}>卖方
+                    <label class="flex-1 flex items-center justify-center h-10 rounded-lg border-2 cursor-pointer transition-colors hover:border-red-300 ${c&&c.permission&&c.permission.includes('卖方')?'border-red-400 bg-red-50 text-red-600':'border-gray-200 text-gray-500'}" onclick="togglePerm('卖方',this)">
+                        <input type="checkbox" name="mPermission" value="卖方" class="hidden" ${c&&c.permission&&c.permission.includes('卖方')?'checked':''}>卖方
                     </label>
-                    <label class="flex-1 flex items-center justify-center h-10 rounded-lg border-2 cursor-pointer transition-colors hover:border-red-300 ${c&&c.permission==='订阅会员'?'border-red-400 bg-red-50 text-red-600':'border-gray-200 text-gray-500'}" onclick="document.getElementById('mPermSub').checked=true;updatePermStyles()">
-                        <input type="radio" id="mPermSub" name="mPermission" value="订阅会员" class="hidden" ${c&&c.permission==='订阅会员'?'checked':''}>订阅会员
+                    <label class="flex-1 flex items-center justify-center h-10 rounded-lg border-2 cursor-pointer transition-colors hover:border-red-300 ${c&&c.permission&&c.permission.includes('订阅会员')?'border-red-400 bg-red-50 text-red-600':'border-gray-200 text-gray-500'}" onclick="togglePerm('订阅会员',this)">
+                        <input type="checkbox" name="mPermission" value="订阅会员" class="hidden" ${c&&c.permission&&c.permission.includes('订阅会员')?'checked':''}>订阅会员
                     </label>
                 </div>
+            </div>
+            <!-- 封面上传 -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">会议封面</label>
+                <div id="coverUploadArea" class="relative border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-red-300 hover:bg-red-50/30 transition-colors cursor-pointer" onclick="document.getElementById('coverFileInput').click()">
+                    <div id="coverUploadPlaceholder" class="${c&&c.cover?'hidden':''}">
+                        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2"><i class="ri-image-add-line text-gray-400 text-lg"></i></div>
+                        <p class="text-sm text-gray-500">点击上传会议封面</p>
+                        <p class="text-xs text-gray-400 mt-1">支持 JPG、PNG 格式，上限 5MB</p>
+                    </div>
+                    <div id="coverUploadPreview" class="${c&&c.cover?'':'hidden'}">
+                        ${c&&c.cover ? `<img src="${c.cover}" class="max-h-36 mx-auto rounded-lg shadow-sm" alt="封面预览">` : '<img id="coverPreviewImg" class="max-h-36 mx-auto rounded-lg shadow-sm hidden" alt="封面预览">'}
+                        <p class="text-xs text-gray-400 mt-2">点击重新上传</p>
+                    </div>
+                </div>
+                <input type="file" id="coverFileInput" class="hidden" accept="image/jpeg,image/png" onchange="handleCoverUpload(this)">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">会议简介</label>
@@ -375,16 +392,16 @@ function saveConference() {
     const time = document.getElementById('mTime').value.replace('T',' ');
     const status = document.getElementById('mStatus').value;
     const desc = document.getElementById('mDesc').value.trim();
-    const permRadio = document.querySelector('input[name="mPermission"]:checked');
-    const permission = permRadio ? permRadio.value : '买方';
+    const permCbs = document.querySelectorAll('input[name="mPermission"]:checked');
+    const permission = Array.from(permCbs).map(cb => cb.value);
     if (!title) { alert('请输入会议标题'); return; }
     if (!expertName) { alert('请选择主讲专家'); return; }
 
     if (editingId) {
         const c = conferences.find(x => x.id === editingId);
-        if (c) { c.title = title; c.experts = [{name:expertName, inst:expertInst}]; c.tags = tags ? tags.split('、') : []; c.time = time; c.status = status; c.desc = desc; c.permission = permission; }
+        if (c) { c.title = title; c.experts = [{name:expertName, inst:expertInst}]; c.tags = tags ? tags.split('、') : []; c.time = time; c.status = status; c.desc = desc; c.permission = permission; c.cover = coverData || c.cover; }
     } else {
-        conferences.unshift({ id: 'c'+Date.now(), title, experts: [{name:expertName, inst:expertInst}], tags: tags ? tags.split('、') : [], time, status, registrations: 0, desc, permission, materials: [] });
+        conferences.unshift({ id: 'c'+Date.now(), title, experts: [{name:expertName, inst:expertInst}], tags: tags ? tags.split('、') : [], time, status, registrations: 0, desc, permission, cover: coverData, materials: [] });
     }
     closeConferenceModal();
     render();
@@ -432,7 +449,7 @@ function openDetailModal(id) {
             </div>
             <div>
                 <div class="text-xs text-gray-400 mb-1">会议权限</div>
-                <div class="text-gray-600">${c.permission || '买方'}</div>
+                <div class="flex gap-1.5">${(c.permission||[]).map(p => `<span class="px-2 py-0.5 rounded text-xs bg-red-50 text-red-600">${p}</span>`).join('') || '<span class="text-gray-400 text-sm">-</span>'}</div>
             </div>
             <div>
                 <div class="text-xs text-gray-400 mb-1">话题标签</div>
@@ -456,7 +473,7 @@ function openDetailModal(id) {
 
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
 function showModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
-function closeConferenceModal() { closeModal('conferenceModal'); editingId = null; selectedExpertId = null; selectedExpertName = ''; }
+function closeConferenceModal() { closeModal('conferenceModal'); editingId = null; selectedExpertId = null; selectedExpertName = ''; coverData = null; }
 
 // ============ 专家下拉选择 ============
 function toggleExpertDropdown() {
@@ -510,19 +527,31 @@ function selectExpert(id, name, institution) {
     closeExpertDropdown();
 }
 
-// ============ 会议权限样式 ============
-function updatePermStyles() {
-    const labels = document.querySelectorAll('label:has(input[name="mPermission"])');
-    labels.forEach(l => {
-        const radio = l.querySelector('input[name="mPermission"]');
-        if (radio.checked) {
-            l.classList.add('border-red-400', 'bg-red-50', 'text-red-600');
-            l.classList.remove('border-gray-200', 'text-gray-500');
-        } else {
-            l.classList.remove('border-red-400', 'bg-red-50', 'text-red-600');
-            l.classList.add('border-gray-200', 'text-gray-500');
-        }
-    });
+// ============ 会议权限多选 ============
+function togglePerm(value, label) {
+    const cb = label.querySelector('input[name="mPermission"]');
+    cb.checked = !cb.checked;
+    if (cb.checked) { label.classList.add('border-red-400','bg-red-50','text-red-600'); label.classList.remove('border-gray-200','text-gray-500'); }
+    else { label.classList.remove('border-red-400','bg-red-50','text-red-600'); label.classList.add('border-gray-200','text-gray-500'); }
+}
+
+// ============ 封面上传 ============
+let coverData = null;
+function handleCoverUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('文件大小不能超过 5MB'); input.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        coverData = e.target.result;
+        document.getElementById('coverUploadPlaceholder').classList.add('hidden');
+        document.getElementById('coverUploadPreview').classList.remove('hidden');
+        const preview = document.getElementById('coverUploadPreview');
+        const img = preview.querySelector('img');
+        if (img) { img.src = coverData; img.classList.remove('hidden'); }
+        else { preview.innerHTML = '<img src="'+coverData+'" class="max-h-36 mx-auto rounded-lg shadow-sm" alt="封面预览"><p class="text-xs text-gray-400 mt-2">点击重新上传</p>'; }
+    };
+    reader.readAsDataURL(file);
 }
 
 function closeDeleteModal() { closeModal('deleteModal'); deletingId = null; }
