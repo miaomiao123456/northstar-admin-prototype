@@ -40,7 +40,7 @@
 
     <!-- 编辑弹窗 -->
     <div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between p-5 border-b border-gray-100">
                 <h3 class="text-lg font-semibold text-gray-900" id="editModalTitle">编辑专家</h3>
                 <button onclick="closeEditModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><i class="ri-close-line text-xl"></i></button>
@@ -67,19 +67,22 @@
 <script>
 // ============ 数据 ============
 let experts = [
-    { id: 'e1', name: '张明远', title: '首席策略分析师', institution: '国泰海通证券', specialties: ['A股', '策略', '宏观'], accuracy: 87, score: 9.2, meetings: 12, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zm' },
-    { id: 'e2', name: '李晓峰', title: '人工智能研究院', institution: '华锐技术', specialties: ['人工智能', '大模型', '投研'], accuracy: 82, score: 8.8, meetings: 8, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=lx' },
-    { id: 'e3', name: '王雅婷', title: '固收研究总监', institution: '固金证券', specialties: ['债券', '利率', '固收'], accuracy: 91, score: 9.5, meetings: 15, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=wy' },
-    { id: 'e4', name: '陈志远', title: '港股研究主管', institution: '东吴证券', specialties: ['港股', '科技', '估值'], accuracy: 79, score: 8.4, meetings: 9, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=cz' },
-    { id: 'e5', name: '刘思远', title: '新能源行业顶尖', institution: '浦发银行投研部', specialties: ['新能源', '汽车', '产业链'], accuracy: 85, score: 8.9, meetings: 6, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ls' },
-    { id: 'e6', name: '赵文博', title: '医药首席分析师', institution: '中信建投', specialties: ['医药', '生物', '创新药'], accuracy: 84, score: 8.7, meetings: 11, status: '取消', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zw' },
-    { id: 'e7', name: '孙丽华', title: '消费行业研究员', institution: '招商证券', specialties: ['消费', '零售', '食品饮料'], accuracy: 88, score: 9.0, meetings: 10, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sl' },
-    { id: 'e8', name: '周建国', title: '量化策略总监', institution: '申万宏源', specialties: ['量化', '因子', '程序化'], accuracy: 80, score: 8.5, meetings: 7, status: '取消', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zj' },
+    { id: 'e1', name: '张明远', title: '首席策略分析师', institution: '国泰海通证券', city: '上海', years: 15, level: '资深', onlinePrice: 3000, onlineUnit: '小时', offlinePrice: 5000, offlineUnit: '单次', bio: '拥有超15年券商策略研究经验，曾任多家头部券商首席策略师，擅长A股和港股市场联动分析，多次获得新财富最佳分析师。', phone: '138****8801', email: 'zhangmy@example.com', wechat: 'zhangmingyuan888', specialties: ['A股', '策略', '宏观'], accuracy: 87, score: 9.2, meetings: 12, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zm' },
+    { id: 'e2', name: '李晓峰', title: '人工智能研究院', institution: '华锐技术', city: '北京', years: 10, level: '高级', onlinePrice: 2500, onlineUnit: '小时', offlinePrice: 4000, offlineUnit: '单次', bio: '专注于AI大模型在金融领域的应用研究，曾主导多个智能投研系统建设，在自然语言处理和知识图谱方向具有深厚积累。', phone: '139****2234', email: 'lixf@huarui.com', wechat: 'lixiaofeng_ai', specialties: ['人工智能', '大模型', '投研'], accuracy: 82, score: 8.8, meetings: 8, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=lx' },
+    { id: 'e3', name: '王雅婷', title: '固收研究总监', institution: '固金证券', city: '深圳', years: 12, level: '资深', onlinePrice: 3500, onlineUnit: '小时', offlinePrice: 6000, offlineUnit: '单次', bio: '深耕固定收益市场逾十年，对利率债、信用债和可转债均有深入研究，多次准确预判利率走势拐点。', phone: '135****5567', email: 'wangyt@gujin.com', wechat: 'wyt_fixedincome', specialties: ['债券', '利率', '固收'], accuracy: 91, score: 9.5, meetings: 15, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=wy' },
+    { id: 'e4', name: '陈志远', title: '港股研究主管', institution: '东吴证券', city: '香港', years: 8, level: '高级', onlinePrice: 2000, onlineUnit: '小时', offlinePrice: 3500, offlineUnit: '单次', bio: '专注港股市场研究，覆盖科技、消费和金融板块，对中概股和港股通标的有独到见解。', phone: '136****7890', email: 'chenzy@dongwu.com', wechat: 'czy_hkstock', specialties: ['港股', '科技', '估值'], accuracy: 79, score: 8.4, meetings: 9, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=cz' },
+    { id: 'e5', name: '刘思远', title: '新能源行业顶尖', institution: '浦发银行投研部', city: '上海', years: 9, level: '高级', onlinePrice: 2200, onlineUnit: '小时', offlinePrice: 3800, offlineUnit: '单次', bio: '新能源行业资深研究员，覆盖光伏、风电和新能源汽车产业链，对产业政策和技术路线演进有深刻理解。', phone: '137****3312', email: 'liusy@pufa.com', wechat: 'liusiyuan_energy', specialties: ['新能源', '汽车', '产业链'], accuracy: 85, score: 8.9, meetings: 6, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ls' },
+    { id: 'e6', name: '赵文博', title: '医药首席分析师', institution: '中信建投', city: '北京', years: 14, level: '资深', onlinePrice: 3200, onlineUnit: '小时', offlinePrice: 5500, offlineUnit: '单次', bio: '拥有医药行业14年研究经验，覆盖创新药、医疗器械和医疗服务，多次获得行业评选最佳分析师称号。', phone: '180****4456', email: 'zhaowb@citic.com', wechat: 'zhaowenbo_med', specialties: ['医药', '生物', '创新药'], accuracy: 84, score: 8.7, meetings: 11, status: '取消', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zw' },
+    { id: 'e7', name: '孙丽华', title: '消费行业研究员', institution: '招商证券', city: '深圳', years: 7, level: '普通', onlinePrice: 1500, onlineUnit: '小时', offlinePrice: 2500, offlineUnit: '单次', bio: '聚焦消费行业研究，覆盖食品饮料、零售和家电等细分赛道，擅长从消费者行为变化中挖掘投资机会。', phone: '181****7723', email: 'sunlh@cmb.com', wechat: 'sunlihua_consumer', specialties: ['消费', '零售', '食品饮料'], accuracy: 88, score: 9.0, meetings: 10, status: '启用', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sl' },
+    { id: 'e8', name: '周建国', title: '量化策略总监', institution: '申万宏源', city: '上海', years: 11, level: '特殊', onlinePrice: 5000, onlineUnit: '小时', offlinePrice: 10000, offlineUnit: '项目', bio: '擅长量化投资策略研发，在因子挖掘、组合优化和程序化交易方面经验丰富，曾管理超百亿量化产品。', phone: '182****8834', email: 'zhoujg@swhy.com', wechat: 'zhoujianguo_quant', specialties: ['量化', '因子', '程序化'], accuracy: 80, score: 8.5, meetings: 7, status: '取消', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zj' },
 ];
 
 let searchQuery = '';
 let activeFilter = '全部';
 let editingExpertId = null;
+let editCardData = null;
+let editAvatarData = null;
+let editAgreementData = null;
 let deletingExpertId = null;
 let viewingExpertId = null;
 
@@ -364,6 +367,30 @@ function openDetailModal(id) {
         </div>
         <div class="space-y-4">
             <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-sm text-gray-500">所在地</span>
+                <span class="text-sm font-medium text-gray-900">${e.city || '-'}</span>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-sm text-gray-500">专家级别</span>
+                <span class="text-sm font-medium text-gray-900">${e.level || '普通'}</span>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-sm text-gray-500">从业年限</span>
+                <span class="text-sm font-medium text-gray-900">${e.years ? e.years + '年' : '-'}</span>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-sm text-gray-500">手机号</span>
+                <span class="text-sm font-medium text-gray-900">${e.phone || '-'}</span>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-sm text-gray-500">邮箱</span>
+                <span class="text-sm font-medium text-gray-900">${e.email || '-'}</span>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-sm text-gray-500">微信</span>
+                <span class="text-sm font-medium text-gray-900">${e.wechat || '-'}</span>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
                 <span class="text-sm text-gray-500">擅长领域</span>
                 <div class="flex gap-1.5">${e.specialties.map(s => `<span class="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">${s}</span>`).join('')}</div>
             </div>
@@ -386,6 +413,25 @@ function openDetailModal(id) {
                 <span class="text-sm text-gray-500">状态</span>
                 <div>${getStatusBadge(e.status)}</div>
             </div>
+            ${(e.onlinePrice || e.offlinePrice) ? `<div class="py-3 border-t border-gray-50">
+                <span class="text-sm text-gray-500 mb-2 block">服务价格</span>
+                <div class="space-y-2">
+                    ${e.onlinePrice ? `<div class="flex items-center justify-between text-sm"><span class="text-gray-500">线上</span><span class="font-medium text-gray-800">¥${e.onlinePrice} / ${e.onlineUnit || '单次'}</span></div>` : ''}
+                    ${e.offlinePrice ? `<div class="flex items-center justify-between text-sm"><span class="text-gray-500">线下</span><span class="font-medium text-gray-800">¥${e.offlinePrice} / ${e.offlineUnit || '单次'}</span></div>` : ''}
+                </div>
+            </div>` : ''}
+            ${e.bio ? `<div class="py-3 border-t border-gray-50">
+                <span class="text-sm text-gray-500 mb-2 block">个人简介</span>
+                <p class="text-sm text-gray-700 leading-relaxed">${e.bio}</p>
+            </div>` : ''}
+            ${e.cardData ? `<div class="py-3 border-t border-gray-50">
+                <span class="text-sm text-gray-500 mb-2 block">名片</span>
+                <div class="flex items-center gap-2 text-sm text-green-600"><i class="ri-checkbox-circle-line"></i>已有上传记录</div>
+            </div>` : ''}
+            ${e.agreementData ? `<div class="py-3 border-t border-gray-50">
+                <span class="text-sm text-gray-500 mb-2 block">合作协议</span>
+                <div class="flex items-center gap-2 text-sm text-green-600"><i class="ri-checkbox-circle-line"></i>已有上传记录</div>
+            </div>` : ''}
         </div>
         <div class="mt-6 flex justify-end gap-3">
             <button onclick="closeDetailModal()" class="h-10 px-5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm">关闭</button>
@@ -406,41 +452,172 @@ function closeDetailModal() {
 // ============ 编辑/新增弹窗 ============
 function openEditModal(id) {
     editingExpertId = id;
+    editCardData = null;
+    editAvatarData = null;
+    editAgreementData = null;
     const isNew = !id;
-    const e = isNew ? { name: '', title: '', institution: '', specialties: [], accuracy: 80, score: 8.0, meetings: 0, status: '启用', avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}` } : experts.find(x => x.id === id);
+    const defaults = { name: '', title: '', institution: '', city: '', years: '', bio: '', specialties: [], phone: '', email: '', wechat: '', level: '普通', onlinePrice: '', onlineUnit: '单次', offlinePrice: '', offlineUnit: '单次', accuracy: 80, score: 8.0, meetings: 0, status: '启用' };
+    const e = isNew ? defaults : (experts.find(x => x.id === id) || defaults);
     if (!e) return;
+
+    const hasCard = e.cardData;
+    const hasAvatar = isNew ? false : true; // existing experts always have avatar
+    const hasAgreement = e.agreementData;
 
     document.getElementById('editModalTitle').textContent = isNew ? '新增专家' : '编辑专家';
     document.getElementById('editContent').innerHTML = `
         <div class="space-y-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">姓名</label>
-                <input type="text" id="editName" value="${e.name}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">姓名 <span class="text-red-500">*</span></label>
+                <input type="text" id="editName" value="${e.name || ''}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">职位</label>
-                <input type="text" id="editTitle" value="${e.title}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+                <input type="text" id="editTitle" value="${e.title || ''}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">所属机构</label>
-                <input type="text" id="editInstitution" value="${e.institution}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">所属机构 <span class="text-red-500">*</span></label>
+                <input type="text" id="editInstitution" value="${e.institution || ''}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">所在地</label>
+                    <input type="text" id="editCity" value="${e.city || ''}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50" placeholder="如：上海">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">专家级别</label>
+                    <select id="editLevel" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50 bg-white">
+                        <option value="普通" ${e.level === '普通' ? 'selected' : ''}>普通</option>
+                        <option value="高级" ${e.level === '高级' ? 'selected' : ''}>高级</option>
+                        <option value="资深" ${e.level === '资深' ? 'selected' : ''}>资深</option>
+                        <option value="特殊" ${e.level === '特殊' ? 'selected' : ''}>特殊</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">从业年限</label>
+                    <input type="number" id="editYears" value="${e.years || ''}" min="0" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50" placeholder="如：10">
+                </div>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">擅长领域（用逗号分隔）</label>
-                <input type="text" id="editSpecialties" value="${e.specialties.join('，')}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+                <input type="text" id="editSpecialties" value="${(e.specialties || []).join('，')}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">个人简介</label>
+                <textarea id="editBio" rows="3" class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50 resize-none" placeholder="请输入专家个人简介">${e.bio || ''}</textarea>
+            </div>
+            <!-- 专家服务价格 -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-3">专家服务价格</label>
+                <div class="space-y-3 p-4 bg-gray-50 rounded-xl">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1.5 font-medium">线上价格</label>
+                        <div class="flex gap-3">
+                            <div class="flex-1 relative">
+                                <input type="number" id="editOnlinePrice" value="${e.onlinePrice || ''}" min="0" step="0.01" class="w-full h-10 px-3 pr-10 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50" placeholder="价格">
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">RMB</span>
+                            </div>
+                            <select id="editOnlineUnit" class="w-32 h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50 bg-white">
+                                <option value="单次" ${e.onlineUnit === '单次' ? 'selected' : ''}>单次/场</option>
+                                <option value="小时" ${e.onlineUnit === '小时' ? 'selected' : ''}>每小时</option>
+                                <option value="天" ${e.onlineUnit === '天' ? 'selected' : ''}>每天</option>
+                                <option value="月" ${e.onlineUnit === '月' ? 'selected' : ''}>每月</option>
+                                <option value="项目" ${e.onlineUnit === '项目' ? 'selected' : ''}>项目</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200 pt-3">
+                        <label class="block text-xs text-gray-400 mb-1.5 font-medium">线下价格</label>
+                        <div class="flex gap-3">
+                            <div class="flex-1 relative">
+                                <input type="number" id="editOfflinePrice" value="${e.offlinePrice || ''}" min="0" step="0.01" class="w-full h-10 px-3 pr-10 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50" placeholder="价格">
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">RMB</span>
+                            </div>
+                            <select id="editOfflineUnit" class="w-32 h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50 bg-white">
+                                <option value="单次" ${e.offlineUnit === '单次' ? 'selected' : ''}>单次/场</option>
+                                <option value="小时" ${e.offlineUnit === '小时' ? 'selected' : ''}>每小时</option>
+                                <option value="天" ${e.offlineUnit === '天' ? 'selected' : ''}>每天</option>
+                                <option value="月" ${e.offlineUnit === '月' ? 'selected' : ''}>每月</option>
+                                <option value="项目" ${e.offlineUnit === '项目' ? 'selected' : ''}>项目</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="grid grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">观点准确率 %</label>
-                    <input type="number" id="editAccuracy" value="${e.accuracy}" min="0" max="100" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">手机号</label>
+                    <input type="text" id="editPhone" value="${e.phone || ''}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50" placeholder="请输入手机号">
                 </div>
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">邮箱</label>
+                    <input type="text" id="editEmail" value="${e.email || ''}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50" placeholder="请输入邮箱">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">微信</label>
+                    <input type="text" id="editWechat" value="${e.wechat || ''}" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50" placeholder="请输入微信号">
+                </div>
+            </div>
+            <!-- 名片上传 -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">名片</label>
+                <div class="relative border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-red-300 hover:bg-red-50/30 transition-colors cursor-pointer" onclick="document.getElementById('cardFileInput').click()">
+                    <div id="cardUploadPlaceholder" class="${hasCard ? 'hidden' : ''}">
+                        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2"><i class="ri-image-add-line text-gray-400 text-lg"></i></div>
+                        <p class="text-sm text-gray-500">点击上传名片</p>
+                        <p class="text-xs text-gray-400 mt-1">支持 JPG、PNG 格式</p>
+                    </div>
+                    <div id="cardUploadPreview" class="${hasCard ? '' : 'hidden'}">
+                        ${hasCard ? '<div class="flex items-center justify-center gap-2 text-sm text-green-600"><i class="ri-checkbox-circle-line"></i>已上传</div>' : ''}
+                        <p class="text-xs text-gray-400 mt-1">点击重新上传</p>
+                    </div>
+                </div>
+                <input type="file" id="cardFileInput" class="hidden" accept="image/jpeg,image/png" onchange="handleCardUpload(this)">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <!-- 头像上传 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">头像</label>
+                    <div class="relative border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-red-300 hover:bg-red-50/30 transition-colors cursor-pointer" onclick="document.getElementById('avatarFileInput').click()">
+                        <div id="avatarUploadPlaceholder" class="${hasAvatar || editAvatarData ? 'hidden' : ''}">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2"><i class="ri-user-smile-line text-gray-400 text-lg"></i></div>
+                            <p class="text-sm text-gray-500">点击上传头像</p>
+                            <p class="text-xs text-gray-400 mt-1">JPG、PNG 格式</p>
+                        </div>
+                        <div id="avatarUploadPreview" class="${hasAvatar || editAvatarData ? '' : 'hidden'}">
+                            ${e.avatar && !editAvatarData ? '<img src="' + e.avatar + '" class="w-14 h-14 rounded-full mx-auto object-cover border-2 border-gray-200">' : (editAvatarData ? '<img src="' + editAvatarData + '" class="w-14 h-14 rounded-full mx-auto object-cover border-2 border-green-400">' : '')}
+                            <p class="text-xs text-gray-400 mt-1">点击重新上传</p>
+                        </div>
+                    </div>
+                    <input type="file" id="avatarFileInput" class="hidden" accept="image/jpeg,image/png" onchange="handleAvatarUpload(this)">
+                </div>
+                <!-- 合作协议上传 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">合作协议附件</label>
+                    <div class="relative border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-red-300 hover:bg-red-50/30 transition-colors cursor-pointer" onclick="document.getElementById('agreementFileInput').click()">
+                        <div id="agreementUploadPlaceholder" class="${hasAgreement ? 'hidden' : ''}">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2"><i class="ri-file-pdf-line text-gray-400 text-lg"></i></div>
+                            <p class="text-sm text-gray-500">点击上传合作协议</p>
+                            <p class="text-xs text-gray-400 mt-1">支持 PDF 格式，上限 10MB</p>
+                        </div>
+                        <div id="agreementUploadPreview" class="${hasAgreement ? '' : 'hidden'}">
+                            ${hasAgreement ? '<div class="flex items-center justify-center gap-2 text-sm text-green-600"><i class="ri-checkbox-circle-line"></i>已上传</div>' : ''}
+                            <p class="text-xs text-gray-400 mt-1">点击重新上传</p>
+                        </div>
+                    </div>
+                    <input type="file" id="agreementFileInput" class="hidden" accept=".pdf" onchange="handleAgreementUpload(this)">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">综合评分</label>
-                    <input type="number" id="editScore" value="${e.score}" min="0" max="10" step="0.1" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+                    <input type="number" id="editScore" value="${e.score || 0}" min="0" max="10" step="0.1" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">会议场次</label>
-                    <input type="number" id="editMeetings" value="${e.meetings}" min="0" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
+                    <input type="number" id="editMeetings" value="${e.meetings || 0}" min="0" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-50">
                 </div>
             </div>
             <div>
@@ -472,13 +649,74 @@ function closeEditModal() {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
     editingExpertId = null;
+    editCardData = null;
+    editAvatarData = null;
+    editAgreementData = null;
 }
+
+// ============ 文件上传处理 ============
+function handleCardUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('名片文件不能超过 5MB'); input.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        editCardData = e.target.result;
+        document.getElementById('cardUploadPlaceholder').classList.add('hidden');
+        const preview = document.getElementById('cardUploadPreview');
+        preview.classList.remove('hidden');
+        preview.innerHTML = '<div class="flex items-center justify-center gap-2 text-sm text-green-600"><i class="ri-checkbox-circle-line"></i>' + file.name + '</div><p class="text-xs text-gray-400 mt-1">点击重新上传</p>';
+    };
+    reader.readAsDataURL(file);
+}
+
+function handleAvatarUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('头像文件不能超过 5MB'); input.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        editAvatarData = e.target.result;
+        document.getElementById('avatarUploadPlaceholder').classList.add('hidden');
+        const preview = document.getElementById('avatarUploadPreview');
+        preview.classList.remove('hidden');
+        preview.innerHTML = '<img src="' + editAvatarData + '" class="w-14 h-14 rounded-full mx-auto object-cover border-2 border-green-400"><p class="text-xs text-gray-400 mt-1">点击重新上传</p>';
+    };
+    reader.readAsDataURL(file);
+}
+
+function handleAgreementUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { alert('合作协议文件不能超过 10MB'); input.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        editAgreementData = e.target.result;
+        document.getElementById('agreementUploadPlaceholder').classList.add('hidden');
+        const preview = document.getElementById('agreementUploadPreview');
+        preview.classList.remove('hidden');
+        preview.innerHTML = '<div class="flex items-center justify-center gap-2 text-sm text-green-600"><i class="ri-checkbox-circle-line"></i>' + file.name + '</div><p class="text-xs text-gray-400 mt-1">点击重新上传</p>';
+    };
+    reader.readAsDataURL(file);
+}
+
 function saveExpert() {
     const name = document.getElementById('editName').value.trim();
     const title = document.getElementById('editTitle').value.trim();
     const institution = document.getElementById('editInstitution').value.trim();
+    const city = document.getElementById('editCity').value.trim();
+    const years = parseInt(document.getElementById('editYears').value) || 0;
+    const bio = document.getElementById('editBio').value.trim();
+    const phone = document.getElementById('editPhone').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    const wechat = document.getElementById('editWechat').value.trim();
+    const level = document.getElementById('editLevel').value;
+    const onlinePrice = parseFloat(document.getElementById('editOnlinePrice').value) || 0;
+    const onlineUnit = document.getElementById('editOnlineUnit').value;
+    const offlinePrice = parseFloat(document.getElementById('editOfflinePrice').value) || 0;
+    const offlineUnit = document.getElementById('editOfflineUnit').value;
     const specialties = document.getElementById('editSpecialties').value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
-    const accuracy = parseInt(document.getElementById('editAccuracy').value) || 0;
+    const accuracy = 80;
     const score = parseFloat(document.getElementById('editScore').value) || 0;
     const meetings = parseInt(document.getElementById('editMeetings').value) || 0;
     const status = document.querySelector('input[name="editStatus"]:checked')?.value || '启用';
@@ -491,11 +729,15 @@ function saveExpert() {
     if (editingExpertId) {
         const idx = experts.findIndex(e => e.id === editingExpertId);
         if (idx > -1) {
-            experts[idx] = { ...experts[idx], name, title, institution, specialties, accuracy, score, meetings, status };
+            experts[idx] = { ...experts[idx], name, title, institution, city, years, bio, phone, email, wechat, level, onlinePrice, onlineUnit, offlinePrice, offlineUnit, specialties, accuracy, score, meetings, status,
+                cardData: editCardData || experts[idx].cardData,
+                avatar: editAvatarData || experts[idx].avatar,
+                agreementData: editAgreementData || experts[idx].agreementData };
         }
     } else {
         const newId = 'e' + (Date.now() % 100000);
-        experts.push({ id: newId, name, title, institution, specialties, accuracy, score, meetings, status, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${newId}` });
+        experts.push({ id: newId, name, title, institution, city, years, bio, phone, email, wechat, level, onlinePrice, onlineUnit, offlinePrice, offlineUnit, specialties, accuracy, score, meetings, status,
+            cardData: editCardData, avatar: editAvatarData || `https://api.dicebear.com/7.x/avataaars/svg?seed=${newId}`, agreementData: editAgreementData });
     }
     closeEditModal();
     render();
