@@ -65,20 +65,34 @@
 <script>
 // ============ 数据 ============
 let conferences = [
-    { id: 'c1', title: '2026年A股市场展望：结构性机会与风险防范', experts: [{name:'张明远',inst:'国泰海通证券'}], tags: ['券商','行业分析','宏观解读','A股','策略'], time: '2026-04-10 14:00', registrations: 328, status: '即将开始', desc: '深度解读2026年A股市场的结构性机会，涵盖宏观政策、行业配置和个股策略。', materials: ['A股策略报告.pdf','宏观数据.xlsx'] },
-    { id: 'c2', title: '人工智能赋能金融：大模型在投研领域的实践探索', experts: [{name:'李晓峰',inst:'华锐技术'},{name:'孙晓雯',inst:'中金公司'}], tags: ['人工智能','大模型','投研','金融科技','高管'], time: '2026-04-08 15:30', registrations: 256, status: '直播中', desc: '探讨大语言模型在金融投研场景中的落地应用与未来发展趋势。', materials: ['AI投研白皮书.pdf'] },
-    { id: 'c3', title: '债券市场利率走势分析与配置策略', experts: [{name:'王雅婷',inst:'固金证券'}], tags: ['债券','利率','固收','深度专访','金融'], time: '2026-03-29 10:00', registrations: 189, status: '已结束', desc: '分析当前债券市场利率走势，提供机构投资者债券配置建议。', materials: ['利率分析报告.pdf','配置建议.xlsx'] },
-    { id: 'c4', title: '港股科技板块：估值修复与催化剂分析', experts: [{name:'陈志远',inst:'东吴证券'}], tags: ['港股','科技','估值','独家会议','互联网'], time: '2026-03-21 14:00', registrations: 145, status: '已结束', desc: '深入分析港股科技板块的估值修复逻辑及未来催化剂。', materials: ['港股科技报告.pdf'] },
-    { id: 'c5', title: '新能源汽车产业链：竞争格局重塑与投资机会', experts: [{name:'刘思远',inst:'浦发银行投研部'}], tags: ['新能源','汽车','产业链','实地调研','A股'], time: '2026-04-15 09:30', registrations: 412, status: '即将开始', desc: '实地调研新能源汽车产业链，重塑竞争格局下的投资机会分析。', materials: ['产业链图谱.pdf','调研纪要.docx'] },
-    { id: 'c6', title: '宏观经济政策解读：财政发力与货币配合', experts: [{name:'赵文博',inst:'中信建投'},{name:'周建国',inst:'申万宏源'}], tags: ['宏观','财政','货币','政策解读','A股'], time: '2026-04-12 16:00', registrations: 567, status: '即将开始', desc: '解读最新宏观经济政策，分析财政与货币政策的协同效应。', materials: ['政策解读报告.pdf'] },
-    { id: 'c7', title: '量化投资策略：多因子模型的构建与优化', experts: [{name:'周建国',inst:'申万宏源'}], tags: ['量化','因子','程序化','行业调查','金融'], time: '2026-03-15 14:00', registrations: 98, status: '已结束', desc: '分享多因子量化模型的构建方法及实盘优化经验。', materials: ['量化策略报告.pdf','因子库说明.xlsx'] },
-    { id: 'c8', title: '医药行业投资机会：创新药与医疗器械的双轮驱动', experts: [{name:'赵文博',inst:'中信建投'},{name:'孙丽华',inst:'招商证券'}], tags: ['医药','生物','创新药','医疗器械','专家'], time: '2026-04-18 10:00', registrations: 879, status: '直播中', desc: '探讨创新药与医疗器械两大赛道的投资机会与风险。', materials: ['医药行业深度报告.pdf','创新药管线.xlsx'] },
+    { id: 'c1', title: '2026年A股市场展望：结构性机会与风险防范', experts: [{name:'张明远',inst:'国泰海通证券'}], tags: ['券商','行业分析','宏观解读','A股','策略'], time: '2026-04-10 14:00', registrations: 328, status: '即将开始', permission: '买方', link: 'https://meeting.tencent.com/dm/xxx001', desc: '深度解读2026年A股市场的结构性机会，涵盖宏观政策、行业配置和个股策略。', materials: ['A股策略报告.pdf','宏观数据.xlsx'] },
+    { id: 'c2', title: '人工智能赋能金融：大模型在投研领域的实践探索', experts: [{name:'李晓峰',inst:'华锐技术'}], tags: ['人工智能','大模型','投研','金融科技','高管'], time: '2026-04-08 15:30', registrations: 256, status: '直播中', permission: '订阅会员', link: 'https://meeting.tencent.com/dm/xxx002', desc: '探讨大语言模型在金融投研场景中的落地应用与未来发展趋势。', materials: ['AI投研白皮书.pdf'] },
+    { id: 'c3', title: '债券市场利率走势分析与配置策略', experts: [{name:'王雅婷',inst:'固金证券'}], tags: ['债券','利率','固收','深度专访','金融'], time: '2026-03-29 10:00', registrations: 189, status: '已结束', permission: '买方', link: 'https://meeting.tencent.com/dm/xxx003', desc: '分析当前债券市场利率走势，提供机构投资者债券配置建议。', materials: ['利率分析报告.pdf','配置建议.xlsx'] },
+    { id: 'c4', title: '港股科技板块：估值修复与催化剂分析', experts: [{name:'陈志远',inst:'东吴证券'}], tags: ['港股','科技','估值','独家会议','互联网'], time: '2026-03-21 14:00', registrations: 145, status: '已结束', permission: '卖方', link: 'https://meeting.tencent.com/dm/xxx004', desc: '深入分析港股科技板块的估值修复逻辑及未来催化剂。', materials: ['港股科技报告.pdf'] },
+    { id: 'c5', title: '新能源汽车产业链：竞争格局重塑与投资机会', experts: [{name:'刘思远',inst:'浦发银行投研部'}], tags: ['新能源','汽车','产业链','实地调研','A股'], time: '2026-04-15 09:30', registrations: 412, status: '即将开始', permission: '买方', link: 'https://meeting.tencent.com/dm/xxx005', desc: '实地调研新能源汽车产业链，重塑竞争格局下的投资机会分析。', materials: ['产业链图谱.pdf','调研纪要.docx'] },
+    { id: 'c6', title: '宏观经济政策解读：财政发力与货币配合', experts: [{name:'赵文博',inst:'中信建投'}], tags: ['宏观','财政','货币','政策解读','A股'], time: '2026-04-12 16:00', registrations: 567, status: '即将开始', permission: '订阅会员', link: 'https://meeting.tencent.com/dm/xxx006', desc: '解读最新宏观经济政策，分析财政与货币政策的协同效应。', materials: ['政策解读报告.pdf'] },
+    { id: 'c7', title: '量化投资策略：多因子模型的构建与优化', experts: [{name:'周建国',inst:'申万宏源'}], tags: ['量化','因子','程序化','行业调查','金融'], time: '2026-03-15 14:00', registrations: 98, status: '已结束', permission: '卖方', link: 'https://meeting.tencent.com/dm/xxx007', desc: '分享多因子量化模型的构建方法及实盘优化经验。', materials: ['量化策略报告.pdf','因子库说明.xlsx'] },
+    { id: 'c8', title: '医药行业投资机会：创新药与医疗器械的双轮驱动', experts: [{name:'赵文博',inst:'中信建投'}], tags: ['医药','生物','创新药','医疗器械','专家'], time: '2026-04-18 10:00', registrations: 879, status: '直播中', permission: '买方', link: 'https://meeting.tencent.com/dm/xxx008', desc: '探讨创新药与医疗器械两大赛道的投资机会与风险。', materials: ['医药行业深度报告.pdf','创新药管线.xlsx'] },
 ];
 
 let searchQuery = '';
 let activeFilter = '全部';
 let editingId = null;
 let deletingId = null;
+let selectedExpertId = null;
+let selectedExpertName = '';
+
+// 专家名单（供下拉选择，与专家管理页面同步）
+const expertList = [
+    { id: 'e1', name: '张明远', institution: '国泰海通证券' },
+    { id: 'e2', name: '李晓峰', institution: '华锐技术' },
+    { id: 'e3', name: '王雅婷', institution: '固金证券' },
+    { id: 'e4', name: '陈志远', institution: '东吴证券' },
+    { id: 'e5', name: '刘思远', institution: '浦发银行投研部' },
+    { id: 'e6', name: '赵文博', institution: '中信建投' },
+    { id: 'e7', name: '孙丽华', institution: '招商证券' },
+    { id: 'e8', name: '周建国', institution: '申万宏源' },
+];
 
 // ============ 导航 ============
 const navLinkMap = {
@@ -236,7 +250,7 @@ function render() {
                                     <th class="px-5 py-3 font-medium">开始时间</th>
                                     <th class="px-5 py-3 font-medium">报名人数</th>
                                     <th class="px-5 py-3 font-medium">状态</th>
-                                    <th class="px-5 py-3 font-medium">链接资料</th>
+                                    <th class="px-5 py-3 font-medium">会议链接</th>
                                     <th class="px-5 py-3 font-medium">操作</th>
                                 </tr>
                             </thead>
@@ -261,14 +275,10 @@ function render() {
                                     <td class="px-5 py-4 text-gray-600">${c.registrations} 人</td>
                                     <td class="px-5 py-4">${getStatusBadge(c.status)}</td>
                                     <td class="px-5 py-4">
-                                        <button onclick="openDetailModal('${c.id}')" class="text-red-500 hover:text-red-600 text-xs flex items-center gap-1 cursor-pointer"><i class="ri-attachment-line"></i>${c.materials.length}个文件</button>
+                                        ${c.link ? `<a href="${c.link}" target="_blank" class="text-blue-500 hover:text-blue-600 text-xs flex items-center gap-1 cursor-pointer max-w-[160px] truncate" title="${c.link}"><i class="ri-links-line flex-shrink-0"></i><span class="truncate">${c.link}</span></a>` : '<span class="text-gray-400 text-xs">暂无</span>'}
                                     </td>
                                     <td class="px-5 py-4">
-                                        <div class="flex items-center gap-2">
-                                            ${c.status === '直播中' ? `<button class="px-2.5 py-1 rounded-md bg-red-50 text-red-500 text-xs hover:bg-red-100 transition-colors cursor-pointer flex items-center gap-1"><i class="ri-live-line"></i>直播</button>` : ''}
-                                            <button onclick="openConferenceModal('${c.id}')" class="px-2.5 py-1 rounded-md bg-gray-50 text-gray-600 text-xs hover:bg-gray-100 transition-colors cursor-pointer">编辑</button>
-                                            <button onclick="openDeleteModal('${c.id}')" class="px-2.5 py-1 rounded-md bg-gray-50 text-gray-600 text-xs hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer">删除</button>
-                                        </div>
+                                        <button onclick="openConferenceModal('${c.id}')" class="px-2.5 py-1 rounded-md bg-gray-50 text-gray-600 text-xs hover:bg-gray-100 transition-colors cursor-pointer">编辑</button>
                                     </td>
                                 </tr>`).join('')}
                             </tbody>
@@ -286,6 +296,9 @@ function render() {
 function openConferenceModal(id) {
     editingId = id || null;
     const c = id ? conferences.find(x => x.id === id) : null;
+    // 预设专家
+    selectedExpertId = c ? (expertList.find(e => e.name === c.experts[0]?.name)?.id || null) : null;
+    selectedExpertName = c ? (c.experts[0]?.name || '') : '';
     document.getElementById('conferenceModalTitle').textContent = c ? '编辑会议' : '新增会议';
     document.getElementById('conferenceModalBody').innerHTML = `
         <div class="space-y-4">
@@ -295,7 +308,20 @@ function openConferenceModal(id) {
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">主讲专家</label>
-                <input id="mExpert" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400" value="${c?c.experts.map(e=>e.name).join('、'):''}" placeholder="输入专家姓名，多人用顿号分隔">
+                <div class="relative" id="expertDropdownWrap">
+                    <div id="expertSelector" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm cursor-pointer bg-white flex items-center justify-between hover:border-red-300 transition-colors" onclick="toggleExpertDropdown()">
+                        <span id="expertSelectedText" class="${selectedExpertName ? 'text-gray-800' : 'text-gray-400'}">${selectedExpertName || '点击选择主讲专家'}</span>
+                        <i class="ri-arrow-down-s-line text-gray-400 ml-2 transition-transform" id="expertDropdownArrow"></i>
+                    </div>
+                    <div id="expertDropdown" class="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden max-h-60 overflow-hidden flex flex-col">
+                        <div class="p-2 border-b border-gray-100 sticky top-0 bg-white">
+                            <input id="expertSearch" type="text" class="w-full px-3 py-1.5 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-red-300" placeholder="搜索专家姓名..." oninput="filterExpertList()" onclick="event.stopPropagation()">
+                        </div>
+                        <div id="expertOptions" class="overflow-y-auto"></div>
+                    </div>
+                </div>
+                <input type="hidden" id="mExpert" value="${c?c.experts[0]?c.experts[0].name:selectedExpertName:selectedExpertName}">
+                <input type="hidden" id="mExpertInst" value="${c?c.experts[0]?c.experts[0].inst:'':selectedExpertName ? (expertList.find(e=>e.name===selectedExpertName)||{}).institution||'':''}">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">话题标签</label>
@@ -316,6 +342,20 @@ function openConferenceModal(id) {
                 </div>
             </div>
             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">会议权限</label>
+                <div class="flex gap-3">
+                    <label class="flex-1 flex items-center justify-center h-10 rounded-lg border-2 cursor-pointer transition-colors hover:border-red-300 ${c&&c.permission==='买方'?'border-red-400 bg-red-50 text-red-600':'border-gray-200 text-gray-500'}" onclick="document.getElementById('mPermBuyer').checked=true;updatePermStyles()">
+                        <input type="radio" id="mPermBuyer" name="mPermission" value="买方" class="hidden" ${c&&c.permission==='买方'?'checked':''}>买方
+                    </label>
+                    <label class="flex-1 flex items-center justify-center h-10 rounded-lg border-2 cursor-pointer transition-colors hover:border-red-300 ${c&&c.permission==='卖方'?'border-red-400 bg-red-50 text-red-600':'border-gray-200 text-gray-500'}" onclick="document.getElementById('mPermSeller').checked=true;updatePermStyles()">
+                        <input type="radio" id="mPermSeller" name="mPermission" value="卖方" class="hidden" ${c&&c.permission==='卖方'?'checked':''}>卖方
+                    </label>
+                    <label class="flex-1 flex items-center justify-center h-10 rounded-lg border-2 cursor-pointer transition-colors hover:border-red-300 ${c&&c.permission==='订阅会员'?'border-red-400 bg-red-50 text-red-600':'border-gray-200 text-gray-500'}" onclick="document.getElementById('mPermSub').checked=true;updatePermStyles()">
+                        <input type="radio" id="mPermSub" name="mPermission" value="订阅会员" class="hidden" ${c&&c.permission==='订阅会员'?'checked':''}>订阅会员
+                    </label>
+                </div>
+            </div>
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">会议简介</label>
                 <textarea id="mDesc" rows="3" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-400 resize-none" placeholder="输入会议简介">${c?c.desc:''}</textarea>
             </div>
@@ -329,18 +369,22 @@ function openConferenceModal(id) {
 
 function saveConference() {
     const title = document.getElementById('mTitle').value.trim();
-    const expert = document.getElementById('mExpert').value.trim();
+    const expertName = document.getElementById('mExpert').value.trim();
+    const expertInst = document.getElementById('mExpertInst').value.trim();
     const tags = document.getElementById('mTags').value.trim();
     const time = document.getElementById('mTime').value.replace('T',' ');
     const status = document.getElementById('mStatus').value;
     const desc = document.getElementById('mDesc').value.trim();
+    const permRadio = document.querySelector('input[name="mPermission"]:checked');
+    const permission = permRadio ? permRadio.value : '买方';
     if (!title) { alert('请输入会议标题'); return; }
+    if (!expertName) { alert('请选择主讲专家'); return; }
 
     if (editingId) {
         const c = conferences.find(x => x.id === editingId);
-        if (c) { c.title = title; c.experts = expert ? [{name:expert.split('、')[0],inst:expert.split('、')[1]||'待定'}] : []; c.tags = tags ? tags.split('、') : []; c.time = time; c.status = status; c.desc = desc; }
+        if (c) { c.title = title; c.experts = [{name:expertName, inst:expertInst}]; c.tags = tags ? tags.split('、') : []; c.time = time; c.status = status; c.desc = desc; c.permission = permission; }
     } else {
-        conferences.unshift({ id: 'c'+Date.now(), title, experts: expert ? [{name:expert.split('、')[0],inst:expert.split('、')[1]||'待定'}] : [], tags: tags ? tags.split('、') : [], time, status, registrations: 0, desc, materials: [] });
+        conferences.unshift({ id: 'c'+Date.now(), title, experts: [{name:expertName, inst:expertInst}], tags: tags ? tags.split('、') : [], time, status, registrations: 0, desc, permission, materials: [] });
     }
     closeConferenceModal();
     render();
@@ -387,12 +431,20 @@ function openDetailModal(id) {
                 </div>
             </div>
             <div>
+                <div class="text-xs text-gray-400 mb-1">会议权限</div>
+                <div class="text-gray-600">${c.permission || '买方'}</div>
+            </div>
+            <div>
                 <div class="text-xs text-gray-400 mb-1">话题标签</div>
                 <div class="flex flex-wrap gap-1">${c.tags.map(t=>`<span class="px-2 py-0.5 rounded-md bg-gray-50 text-gray-500 text-xs">${t}</span>`).join('')}</div>
             </div>
             <div>
                 <div class="text-xs text-gray-400 mb-1">会议简介</div>
                 <div class="text-gray-600 text-sm">${c.desc}</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 mb-1">会议链接</div>
+                <div class="text-gray-600 text-sm">${c.link ? `<a href="${c.link}" target="_blank" class="text-blue-500 hover:text-blue-600 underline break-all">${c.link}</a>` : '<span class="text-gray-400">暂无链接</span>'}</div>
             </div>
             <div>
                 <div class="text-xs text-gray-400 mb-1">链接资料</div>
@@ -404,7 +456,75 @@ function openDetailModal(id) {
 
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
 function showModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
-function closeConferenceModal() { closeModal('conferenceModal'); editingId = null; }
+function closeConferenceModal() { closeModal('conferenceModal'); editingId = null; selectedExpertId = null; selectedExpertName = ''; }
+
+// ============ 专家下拉选择 ============
+function toggleExpertDropdown() {
+    const dropdown = document.getElementById('expertDropdown');
+    const arrow = document.getElementById('expertDropdownArrow');
+    if (dropdown.classList.contains('hidden')) {
+        dropdown.classList.remove('hidden');
+        arrow.classList.add('rotate-180');
+        filterExpertList();
+        setTimeout(() => document.addEventListener('click', closeExpertDropdownHandle), 0);
+    } else {
+        closeExpertDropdown();
+    }
+}
+
+function closeExpertDropdownHandle(e) {
+    const wrap = document.getElementById('expertDropdownWrap');
+    if (!wrap.contains(e.target)) { closeExpertDropdown(); document.removeEventListener('click', closeExpertDropdownHandle); }
+}
+
+function closeExpertDropdown() {
+    const dropdown = document.getElementById('expertDropdown');
+    const arrow = document.getElementById('expertDropdownArrow');
+    dropdown.classList.add('hidden');
+    arrow.classList.remove('rotate-180');
+}
+
+function filterExpertList() {
+    const query = document.getElementById('expertSearch').value.toLowerCase().trim();
+    const container = document.getElementById('expertOptions');
+    const filtered = expertList.filter(e => !query || e.name.toLowerCase().includes(query) || e.institution.toLowerCase().includes(query));
+    if (filtered.length === 0) {
+        container.innerHTML = '<div class="px-4 py-3 text-sm text-gray-400 text-center">无匹配专家</div>';
+    } else {
+        container.innerHTML = filtered.map(e => `
+            <div class="px-4 py-2.5 text-sm hover:bg-red-50 cursor-pointer border-b border-gray-50 flex items-center justify-between ${selectedExpertId === e.id ? 'bg-red-50 text-red-600 font-medium' : 'text-gray-700'}"
+                onclick="selectExpert('${e.id}','${e.name}','${e.institution}')">
+                <div><span>${e.name}</span><span class="text-xs text-gray-400 ml-2">${e.institution}</span></div>
+                ${selectedExpertId === e.id ? '<i class="ri-check-line text-red-500"></i>' : ''}
+            </div>`).join('');
+    }
+}
+
+function selectExpert(id, name, institution) {
+    selectedExpertId = id; selectedExpertName = name;
+    document.getElementById('expertSelectedText').textContent = name + ' · ' + institution;
+    document.getElementById('expertSelectedText').classList.remove('text-gray-400');
+    document.getElementById('expertSelectedText').classList.add('text-gray-800');
+    document.getElementById('mExpert').value = name;
+    document.getElementById('mExpertInst').value = institution;
+    closeExpertDropdown();
+}
+
+// ============ 会议权限样式 ============
+function updatePermStyles() {
+    const labels = document.querySelectorAll('label:has(input[name="mPermission"])');
+    labels.forEach(l => {
+        const radio = l.querySelector('input[name="mPermission"]');
+        if (radio.checked) {
+            l.classList.add('border-red-400', 'bg-red-50', 'text-red-600');
+            l.classList.remove('border-gray-200', 'text-gray-500');
+        } else {
+            l.classList.remove('border-red-400', 'bg-red-50', 'text-red-600');
+            l.classList.add('border-gray-200', 'text-gray-500');
+        }
+    });
+}
+
 function closeDeleteModal() { closeModal('deleteModal'); deletingId = null; }
 function closeDetailModal() { closeModal('detailModal'); }
 
