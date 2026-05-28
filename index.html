@@ -51,7 +51,7 @@
             e.preventDefault();
             const input = document.getElementById('password-input').value;
             const inputHash = await hashPassword(input);
-            const correctHash = await hashPassword('touyan2026');
+            const correctHash = await hashPassword('bjx2026');
 
             if (inputHash === correctHash) {
                 sessionStorage.setItem('northstar_auth', 'authenticated');
